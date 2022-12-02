@@ -1,0 +1,45 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: UseDotNet@2
+  displayName: Use .NET 6.0
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: 'test'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    arguments: '-c Release -r win-x86 --self-contained true -o $(Build.ArtifactStagingDirectory)/l4d2-anti-cheat -p:PublishReadyToRun=true -p:PublishSingleFile=false'
+    zipAfterPublish: false
+    modifyOutputPath: false
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'l4d2-anti-cheat'
+    publishLocation: 'Container'
