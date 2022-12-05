@@ -8,7 +8,11 @@ namespace L4D2AntiCheat.Sdk;
 
 public class ServerManagerContext : IServerManagerContext
 {
+#if DEBUG
     private const string BaseUrl = "http://localhost:7094";
+#else
+    private const string BaseUrl = "https://l4d2-server-manager-api.azurewebsites.net";
+#endif
 
     private static readonly JsonSerializerOptions Options = new()
     {
