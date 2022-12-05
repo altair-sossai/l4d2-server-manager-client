@@ -1,3 +1,6 @@
+using L4D2AntiCheat.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace L4D2AntiCheat;
 
 internal static class Program
@@ -6,6 +9,10 @@ internal static class Program
     private static void Main()
     {
         ApplicationConfiguration.Initialize();
-        Application.Run(new Form1());
+
+        using var serviceProvider = ServiceProviderFactory.New();
+        var mainForm = serviceProvider.GetRequiredService<MainForm>();
+
+        Application.Run(mainForm);
     }
 }
