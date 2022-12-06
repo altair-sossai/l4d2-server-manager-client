@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using L4D2AntiCheat.Sdk.SuspectedPlayer.DependencyInjection;
+using L4D2AntiCheat.Sdk.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace L4D2AntiCheat.DependencyInjection;
@@ -22,6 +22,6 @@ public static class AppInjection
             .FromAssemblies(assemblies)
             .AddClasses(classes => classes.AssignableTo<Form>()));
 
-        serviceCollection.AddServerManagerContext();
+        serviceCollection.AddServerManagerSdk();
     }
 }

@@ -80,11 +80,14 @@
             // 
             // StatusTextBox
             // 
+            this.StatusTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.StatusTextBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.StatusTextBox.Location = new System.Drawing.Point(73, 41);
             this.StatusTextBox.Name = "StatusTextBox";
             this.StatusTextBox.ReadOnly = true;
             this.StatusTextBox.Size = new System.Drawing.Size(319, 23);
             this.StatusTextBox.TabIndex = 5;
+            this.StatusTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // RefreshButton
             // 
