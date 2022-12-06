@@ -2,6 +2,7 @@
 using L4D2AntiCheat.Sdk.Handlers;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
+using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Services;
 using L4D2AntiCheat.Sdk.VirtualMachine.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +38,7 @@ public static class ServerManagerSdkDependencyInjection
         serviceCollection.AddRefitService<ISuspectedPlayerService>();
         serviceCollection.AddRefitService<ISuspectedPlayerSecretService>();
         serviceCollection.AddRefitService<ISuspectedPlayerPingService>();
+        serviceCollection.AddRefitService<ISuspectedPlayerScreenshotService>();
     }
 
     private static void AddRefitService<TService>(this IServiceCollection serviceCollection)

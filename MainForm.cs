@@ -1,12 +1,15 @@
+using Azure.Storage.Blobs;
 using L4D2AntiCheat.App.CurrentUser;
 using L4D2AntiCheat.App.UserSecret.Repositories;
 using L4D2AntiCheat.App.UserSecret.Services;
 using L4D2AntiCheat.DependencyInjection;
+using L4D2AntiCheat.Infrastructure.Extensions;
 using L4D2AntiCheat.Infrastructure.Helpers;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
+using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Services;
 using L4D2AntiCheat.Sdk.VirtualMachine.Services;
@@ -23,6 +26,12 @@ public partial class MainForm : Form
         Interval = 5 * 1000
     };
 
+    private readonly Timer _screenshotTimer = new()
+    {
+        Enabled = false,
+        Interval = 10 * 1000
+    };
+
     private readonly Timer _serverTimer = new()
     {
         Enabled = true,
@@ -37,16 +46,19 @@ public partial class MainForm : Form
         InitializeComponent();
 
         _pingTimer.Tick += (_, _) => PingTick();
+        _screenshotTimer.Tick += (_, _) => ScreenshotTick();
         _serverTimer.Tick += (_, _) => ServerTick();
     }
+
+    private ICurrentUser CurrentUser => _serviceProvider.GetRequiredService<ICurrentUser>();
+    private IVirtualMachineService VirtualMachineService => _serviceProvider.GetRequiredService<IVirtualMachineService>();
+    private IUserSecretService UserSecretService => _serviceProvider.GetRequiredService<IUserSecretService>();
+    private IUserSecretRepository UserSecretRepository => _serviceProvider.GetRequiredService<IUserSecretRepository>();
 
     private ISuspectedPlayerService SuspectedPlayerService => _serviceProvider.GetRequiredService<ISuspectedPlayerService>();
     private ISuspectedPlayerSecretService SuspectedPlayerSecretService => _serviceProvider.GetRequiredService<ISuspectedPlayerSecretService>();
     private ISuspectedPlayerPingService SuspectedPlayerPingService => _serviceProvider.GetRequiredService<ISuspectedPlayerPingService>();
-    private IUserSecretService UserSecretService => _serviceProvider.GetRequiredService<IUserSecretService>();
-    private IUserSecretRepository UserSecretRepository => _serviceProvider.GetRequiredService<IUserSecretRepository>();
-    private IVirtualMachineService VirtualMachineService => _serviceProvider.GetRequiredService<IVirtualMachineService>();
-    private ICurrentUser CurrentUser => _serviceProvider.GetRequiredService<ICurrentUser>();
+    private ISuspectedPlayerScreenshotService SuspectedPlayerScreenshotService => _serviceProvider.GetRequiredService<ISuspectedPlayerScreenshotService>();
 
     protected override void OnLoad(EventArgs e)
     {
@@ -153,11 +165,13 @@ public partial class MainForm : Form
     private void DisableAllTimers()
     {
         _pingTimer.Enabled = false;
+        _screenshotTimer.Enabled = false;
     }
 
     private void EnableAllTimers()
     {
         _pingTimer.Enabled = true;
+        _screenshotTimer.Enabled = true;
     }
 
     private void ServerTick()
@@ -180,6 +194,33 @@ public partial class MainForm : Form
             return;
 
         SuspectedPlayerPingService.PingAsync(new PingCommand()).Wait();
+    }
+
+    private void ScreenshotTick()
+    {
+        if (!ServerIsOnAndLeft4Dead2IsRunning() || !ProcessHelper.Left4Dead2IsFocused())
+            return;
+
+        var result = SuspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
+        if (string.IsNullOrEmpty(result.Url))
+            return;
+
+        var process = ProcessHelper.Left4Dead2Process();
+        if (process == null)
+            return;
+
+        using var screenshot = ScreenshotHelper.TakeScreenshot(process);
+
+        var width = Math.Min(screenshot.Width, 1600);
+        var height = Math.Min(screenshot.Height, 900);
+
+        using var bitmap = new Bitmap(screenshot, width, height);
+        using var memoryStream = bitmap.Compress();
+
+        memoryStream.Position = 0;
+
+        var blobClient = new BlobClient(new Uri(result.Url));
+        blobClient.Upload(memoryStream);
     }
 
     private bool ServerIsOnAndLeft4Dead2IsRunning()
