@@ -49,7 +49,8 @@
             // 
             // SteamAccountComboBox
             // 
-            this.SteamAccountComboBox.DisplayMember = "Name";
+            this.SteamAccountComboBox.DisplayMember = "NameAndSteamId";
+            this.SteamAccountComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SteamAccountComboBox.FormattingEnabled = true;
             this.SteamAccountComboBox.Location = new System.Drawing.Point(73, 12);
             this.SteamAccountComboBox.Name = "SteamAccountComboBox";
