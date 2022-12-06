@@ -204,18 +204,21 @@ public partial class MainForm : Form
     private void ShowInfo(string message)
     {
         StatusTextBox.ForeColor = Color.White;
+        StatusTextBox.Font = new Font(StatusTextBox.Font, FontStyle.Regular);
         StatusTextBox.Text = message;
     }
 
     private void ShowError(string message)
     {
         StatusTextBox.ForeColor = Color.Red;
+        StatusTextBox.Font = new Font(StatusTextBox.Font, FontStyle.Bold);
         StatusTextBox.Text = message;
     }
 
     private void ShowSuccess(string message)
     {
         StatusTextBox.ForeColor = Color.LimeGreen;
+        StatusTextBox.Font = new Font(StatusTextBox.Font, FontStyle.Regular);
         StatusTextBox.Text = message;
     }
 }
