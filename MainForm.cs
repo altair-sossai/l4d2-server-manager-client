@@ -1,9 +1,7 @@
-using Azure.Storage.Blobs;
 using L4D2AntiCheat.App.CurrentUser;
 using L4D2AntiCheat.App.UserSecret.Repositories;
 using L4D2AntiCheat.App.UserSecret.Services;
 using L4D2AntiCheat.DependencyInjection;
-using L4D2AntiCheat.Infrastructure.Extensions;
 using L4D2AntiCheat.Infrastructure.Helpers;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
@@ -35,7 +33,7 @@ public partial class MainForm : Form
     private readonly Timer _serverTimer = new()
     {
         Enabled = true,
-        Interval = 20 * 1000
+        Interval = 15 * 1000
     };
 
     private readonly ServiceProvider _serviceProvider = ServiceProviderFactory.New();
@@ -54,7 +52,6 @@ public partial class MainForm : Form
     private IVirtualMachineService VirtualMachineService => _serviceProvider.GetRequiredService<IVirtualMachineService>();
     private IUserSecretService UserSecretService => _serviceProvider.GetRequiredService<IUserSecretService>();
     private IUserSecretRepository UserSecretRepository => _serviceProvider.GetRequiredService<IUserSecretRepository>();
-
     private ISuspectedPlayerService SuspectedPlayerService => _serviceProvider.GetRequiredService<ISuspectedPlayerService>();
     private ISuspectedPlayerSecretService SuspectedPlayerSecretService => _serviceProvider.GetRequiredService<ISuspectedPlayerSecretService>();
     private ISuspectedPlayerPingService SuspectedPlayerPingService => _serviceProvider.GetRequiredService<ISuspectedPlayerPingService>();
@@ -211,16 +208,7 @@ public partial class MainForm : Form
 
         using var screenshot = ScreenshotHelper.TakeScreenshot(process);
 
-        var width = Math.Min(screenshot.Width, 1600);
-        var height = Math.Min(screenshot.Height, 900);
-
-        using var bitmap = new Bitmap(screenshot, width, height);
-        using var memoryStream = bitmap.Compress();
-
-        memoryStream.Position = 0;
-
-        var blobClient = new BlobClient(new Uri(result.Url));
-        blobClient.Upload(memoryStream);
+        SuspectedPlayerScreenshotService.Upload(result.Url, screenshot);
     }
 
     private bool ServerIsOnAndLeft4Dead2IsRunning()
