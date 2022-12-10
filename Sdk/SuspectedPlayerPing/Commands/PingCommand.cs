@@ -6,7 +6,7 @@ public class PingCommand
 {
     public PingCommand()
     {
-        Focused = ProcessHelper.Left4Dead2IsFocused();
+        Focused = Left4Dead2ProcessHelper.IsFocused();
     }
 
     public bool Focused { get; }

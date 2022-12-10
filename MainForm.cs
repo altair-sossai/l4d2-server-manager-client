@@ -195,14 +195,14 @@ public partial class MainForm : Form
 
     private void ScreenshotTick()
     {
-        if (!ServerIsOnAndLeft4Dead2IsRunning() || !ProcessHelper.Left4Dead2IsFocused())
+        if (!ServerIsOnAndLeft4Dead2IsRunning() || !Left4Dead2ProcessHelper.IsFocused())
             return;
 
         var result = SuspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
         if (string.IsNullOrEmpty(result.Url))
             return;
 
-        var process = ProcessHelper.Left4Dead2Process();
+        var process = Left4Dead2ProcessHelper.GetProcess();
         if (process == null)
             return;
 
@@ -219,7 +219,7 @@ public partial class MainForm : Form
             return false;
         }
 
-        if (!ProcessHelper.Left4Dead2IsRunning())
+        if (!Left4Dead2ProcessHelper.IsRunning())
         {
             ShowError(@"Left 4 Dead 2 não esta em execução");
             return false;

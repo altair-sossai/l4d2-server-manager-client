@@ -3,26 +3,28 @@ using System.Runtime.InteropServices;
 
 namespace L4D2AntiCheat.Infrastructure.Helpers;
 
-public static class ProcessHelper
+public static class Left4Dead2ProcessHelper
 {
-    public static bool Left4Dead2IsRunning()
+    private const string ProcessName = "left4dead2";
+
+    public static Process? GetProcess()
     {
-        return Process.GetProcessesByName("left4dead2").Any();
+        return Process.GetProcessesByName(ProcessName).FirstOrDefault();
     }
 
-    public static Process? Left4Dead2Process()
+    public static bool IsRunning()
     {
-        return Process.GetProcessesByName("left4dead2").FirstOrDefault();
+        return Process.GetProcessesByName(ProcessName).Any();
     }
 
-    public static bool Left4Dead2IsFocused()
+    public static bool IsFocused()
     {
-        var left4Dead2Process = Left4Dead2Process();
+        var process = GetProcess();
         var foregroundWindow = GetForegroundWindow();
 
         GetWindowThreadProcessId(foregroundWindow, out var foregroundWindowProcessId);
 
-        return left4Dead2Process?.Id == foregroundWindowProcessId;
+        return process?.Id == foregroundWindowProcessId;
     }
 
     [DllImport("user32.dll")]

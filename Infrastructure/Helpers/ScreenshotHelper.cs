@@ -19,7 +19,7 @@ public static class ScreenshotHelper
 
         using var graphics = Graphics.FromImage(bitmap);
 
-        graphics.CopyFromScreen(left, top, 0, 0, bitmap.Size);
+        graphics.CopyFromScreen(left, top, 0, 0, bitmap.Size, CopyPixelOperation.SourceCopy);
 
         return bitmap;
     }

@@ -5,10 +5,8 @@ public class CurrentUser : ICurrentUser
     private static long? _communityId;
     private static string? _secret;
 
-    public bool Authenticated => CommunityId.HasValue && !string.IsNullOrEmpty(Secret);
-    public long? CommunityId => _communityId;
-    public string? Secret => _secret;
-    public string? AccessToken => Authenticated ? $"{CommunityId}:{Secret}" : null;
+    private static bool Authenticated => _communityId.HasValue && !string.IsNullOrEmpty(_secret);
+    public string? AccessToken => Authenticated ? $"{_communityId}:{_secret}" : null;
 
     public void LogIn(long communityId, string secret)
     {

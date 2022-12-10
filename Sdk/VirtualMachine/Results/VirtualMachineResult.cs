@@ -3,5 +3,4 @@
 public class VirtualMachineResult
 {
     public bool IsOn { get; set; }
-    public bool IsOff { get; set; }
 }

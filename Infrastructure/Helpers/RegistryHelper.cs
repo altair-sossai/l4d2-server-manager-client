@@ -7,7 +7,10 @@ public static class RegistryHelper
     public static IEnumerable<long> SteamUsers()
     {
         var currentUser = Registry.CurrentUser;
-        var registryKey = currentUser.OpenSubKey(@"SOFTWARE\Valve\Steam\Users")!;
+        var registryKey = currentUser.OpenSubKey(@"SOFTWARE\Valve\Steam\Users");
+        if (registryKey == null)
+            return new List<long>();
+
         var keys = registryKey.GetSubKeyNames();
         var identifiers = keys
             .Select(key => $"[U:1:{key}]")
