@@ -111,9 +111,8 @@
             this.Controls.Add(this.SteamAccountPicture);
             this.Controls.Add(this.SteamAccountComboBox);
             this.Controls.Add(this.SteamAccountLabel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "L4D2 Anti-Cheat";

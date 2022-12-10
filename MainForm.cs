@@ -18,22 +18,26 @@ namespace L4D2AntiCheat;
 
 public partial class MainForm : Form
 {
+    private static bool _serverTickRunning;
+    private static bool _pingTickRunning;
+    private static bool _screenTickRunning;
+
     private readonly Timer _pingTimer = new()
     {
         Enabled = false,
-        Interval = 5 * 1000
+        Interval = 15 * 1000
     };
 
     private readonly Timer _screenshotTimer = new()
     {
         Enabled = false,
-        Interval = 10 * 1000
+        Interval = 30 * 1000
     };
 
     private readonly Timer _serverTimer = new()
     {
         Enabled = true,
-        Interval = 15 * 1000
+        Interval = 30 * 1000
     };
 
     private readonly ServiceProvider _serviceProvider = ServiceProviderFactory.New();
@@ -173,9 +177,15 @@ public partial class MainForm : Form
 
     private void ServerTick()
     {
+        if (_serverTickRunning)
+            return;
+
         try
         {
+            _serverTickRunning = true;
+
             var virtualMachine = VirtualMachineService.InfoAsync().Result;
+
             _serverIsOn = virtualMachine.IsOn;
         }
         catch (Exception exception)
@@ -183,32 +193,68 @@ public partial class MainForm : Form
             Console.WriteLine(exception);
             _serverIsOn = false;
         }
+        finally
+        {
+            _serverTickRunning = false;
+        }
     }
 
     private void PingTick()
     {
-        if (!ServerIsOnAndLeft4Dead2IsRunning())
+        if (_pingTickRunning)
             return;
 
-        SuspectedPlayerPingService.PingAsync(new PingCommand()).Wait();
+        try
+        {
+            _pingTickRunning = true;
+
+            if (!ServerIsOnAndLeft4Dead2IsRunning())
+                return;
+
+            SuspectedPlayerPingService.PingAsync(new PingCommand()).Wait();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+        }
+        finally
+        {
+            _pingTickRunning = false;
+        }
     }
 
     private void ScreenshotTick()
     {
-        if (!ServerIsOnAndLeft4Dead2IsRunning() || !Left4Dead2ProcessHelper.IsFocused())
+        if (_screenTickRunning)
             return;
 
-        var result = SuspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
-        if (string.IsNullOrEmpty(result.Url))
-            return;
+        try
+        {
+            _screenTickRunning = true;
 
-        var process = Left4Dead2ProcessHelper.GetProcess();
-        if (process == null)
-            return;
+            if (!ServerIsOnAndLeft4Dead2IsRunning() || !Left4Dead2ProcessHelper.IsFocused())
+                return;
 
-        using var screenshot = ScreenshotHelper.TakeScreenshot(process);
+            var result = SuspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
+            if (string.IsNullOrEmpty(result.Url))
+                return;
 
-        SuspectedPlayerScreenshotService.Upload(result.Url, screenshot);
+            var process = Left4Dead2ProcessHelper.GetProcess();
+            if (process == null)
+                return;
+
+            using var screenshot = ScreenshotHelper.TakeScreenshot(process);
+
+            SuspectedPlayerScreenshotService.Upload(result.Url, screenshot);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+        }
+        finally
+        {
+            _screenTickRunning = false;
+        }
     }
 
     private bool ServerIsOnAndLeft4Dead2IsRunning()
