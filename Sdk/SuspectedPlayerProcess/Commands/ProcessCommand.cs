@@ -9,25 +9,25 @@ public class ProcessCommand
         ProcessName = process.ProcessName;
         WindowTitle = process.MainWindowTitle;
 
-        var mainModule = TryGetMainModule(process);
+        var module = process.MainModule;
+        FileName = module?.FileName;
+        Module = module?.ModuleName;
 
-        FileName = mainModule?.FileName;
+        var fileVersionInfo = module?.FileVersionInfo;
+        CompanyName = fileVersionInfo?.CompanyName;
+        FileDescription = fileVersionInfo?.FileDescription;
+        FileVersion = fileVersionInfo?.FileVersion;
+        OriginalFilename = fileVersionInfo?.OriginalFilename;
+        ProductName = fileVersionInfo?.ProductName;
     }
 
     public string? ProcessName { get; }
     public string? WindowTitle { get; }
     public string? FileName { get; }
-
-    private static ProcessModule? TryGetMainModule(Process process)
-    {
-        try
-        {
-            return process.MainWindowHandle == IntPtr.Zero ? null : process.MainModule;
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            return null;
-        }
-    }
+    public string? Module { get; }
+    public string? CompanyName { get; }
+    public string? FileDescription { get; }
+    public string? FileVersion { get; }
+    public string? OriginalFilename { get; }
+    public string? ProductName { get; }
 }

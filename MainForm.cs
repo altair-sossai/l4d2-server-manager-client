@@ -35,7 +35,7 @@ public partial class MainForm : Form
     private readonly Timer _processesTimer = new()
     {
         Enabled = false,
-        Interval = 6 * 1000
+        Interval = 60 * 1000
     };
 
     private readonly Timer _screenshotTimer = new()
@@ -283,8 +283,10 @@ public partial class MainForm : Form
             if (!ServerIsOnAndLeft4Dead2IsRunning())
                 return;
 
-            var processes = Process.GetProcesses();
-            var commands = processes.Select(process => new ProcessCommand(process)).ToList();
+            var commands = Process.GetProcesses()
+                .Where(process => process.Id != 0 && process.MainWindowHandle != IntPtr.Zero)
+                .Select(process => new ProcessCommand(process))
+                .ToList();
 
             SuspectedPlayerProcessService.AddOrUpdateAsync(commands).Wait();
         }
