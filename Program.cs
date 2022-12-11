@@ -10,9 +10,17 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
 
+        AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+
         using var serviceProvider = ServiceProviderFactory.New();
         var mainForm = serviceProvider.GetRequiredService<MainForm>();
 
         Application.Run(mainForm);
+    }
+
+    private static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
+    {
+        var exception = (Exception)args.ExceptionObject;
+        Console.WriteLine(exception.Message);
     }
 }
