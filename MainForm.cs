@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using L4D2AntiCheat.App.CurrentUser;
 using L4D2AntiCheat.App.UserSecret.Repositories;
 using L4D2AntiCheat.App.UserSecret.Services;
@@ -7,6 +8,8 @@ using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
+using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Commands;
+using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Services;
@@ -21,11 +24,18 @@ public partial class MainForm : Form
     private static bool _serverTickRunning;
     private static bool _pingTickRunning;
     private static bool _screenTickRunning;
+    private static bool _processesTickRunning;
 
     private readonly Timer _pingTimer = new()
     {
         Enabled = false,
         Interval = 25 * 1000
+    };
+
+    private readonly Timer _processesTimer = new()
+    {
+        Enabled = false,
+        Interval = 6 * 1000
     };
 
     private readonly Timer _screenshotTimer = new()
@@ -49,6 +59,7 @@ public partial class MainForm : Form
 
         _pingTimer.Tick += (_, _) => PingTick();
         _screenshotTimer.Tick += (_, _) => ScreenshotTick();
+        _processesTimer.Tick += (_, _) => ProcessesTick();
         _serverTimer.Tick += (_, _) => ServerTick();
     }
 
@@ -60,6 +71,7 @@ public partial class MainForm : Form
     private ISuspectedPlayerSecretService SuspectedPlayerSecretService => _serviceProvider.GetRequiredService<ISuspectedPlayerSecretService>();
     private ISuspectedPlayerPingService SuspectedPlayerPingService => _serviceProvider.GetRequiredService<ISuspectedPlayerPingService>();
     private ISuspectedPlayerScreenshotService SuspectedPlayerScreenshotService => _serviceProvider.GetRequiredService<ISuspectedPlayerScreenshotService>();
+    private ISuspectedPlayerProcessService SuspectedPlayerProcessService => _serviceProvider.GetRequiredService<ISuspectedPlayerProcessService>();
 
     protected override void OnLoad(EventArgs e)
     {
@@ -167,12 +179,14 @@ public partial class MainForm : Form
     {
         _pingTimer.Enabled = false;
         _screenshotTimer.Enabled = false;
+        _processesTimer.Enabled = false;
     }
 
     private void EnableAllTimers()
     {
         _pingTimer.Enabled = true;
         _screenshotTimer.Enabled = true;
+        _processesTimer.Enabled = true;
     }
 
     private void ServerTick()
@@ -254,6 +268,33 @@ public partial class MainForm : Form
         finally
         {
             _screenTickRunning = false;
+        }
+    }
+
+    private void ProcessesTick()
+    {
+        if (_processesTickRunning)
+            return;
+
+        try
+        {
+            _processesTickRunning = true;
+
+            if (!ServerIsOnAndLeft4Dead2IsRunning())
+                return;
+
+            var processes = Process.GetProcesses();
+            var commands = processes.Select(process => new ProcessCommand(process)).ToList();
+
+            SuspectedPlayerProcessService.AddOrUpdateAsync(commands).Wait();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+        }
+        finally
+        {
+            _processesTickRunning = false;
         }
     }
 

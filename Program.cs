@@ -10,10 +10,10 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
 
-        AppDomain.CurrentDomain.UnhandledException += UnhandledException;
-
         using var serviceProvider = ServiceProviderFactory.New();
         var mainForm = serviceProvider.GetRequiredService<MainForm>();
+
+        AppDomain.CurrentDomain.UnhandledException += UnhandledException;
 
         Application.Run(mainForm);
     }
