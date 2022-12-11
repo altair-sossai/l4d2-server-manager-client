@@ -25,13 +25,13 @@ public partial class MainForm : Form
     private readonly Timer _pingTimer = new()
     {
         Enabled = false,
-        Interval = 15 * 1000
+        Interval = 25 * 1000
     };
 
     private readonly Timer _screenshotTimer = new()
     {
         Enabled = false,
-        Interval = 30 * 1000
+        Interval = 20 * 1000
     };
 
     private readonly Timer _serverTimer = new()
