@@ -22,7 +22,7 @@ public static class Left4Dead2ProcessHelper
         var process = GetProcess();
         var foregroundWindow = GetForegroundWindow();
 
-        GetWindowThreadProcessId(foregroundWindow, out var foregroundWindowProcessId);
+		_ = GetWindowThreadProcessId(foregroundWindow, out var foregroundWindowProcessId);
 
         return process?.Id == foregroundWindowProcessId;
     }
