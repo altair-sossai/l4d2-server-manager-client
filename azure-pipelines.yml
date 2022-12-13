@@ -34,7 +34,7 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
-    arguments: '-c Release -r win-x86 --self-contained true -o $(Build.ArtifactStagingDirectory)/l4d2-anti-cheat -p:PublishReadyToRun=true -p:PublishSingleFile=false'
+    arguments: '-c Release -r win-x64 --self-contained true -o $(Build.ArtifactStagingDirectory)/l4d2-anti-cheat -p:PublishReadyToRun=true -p:PublishSingleFile=false'
     zipAfterPublish: false
     modifyOutputPath: false
 
