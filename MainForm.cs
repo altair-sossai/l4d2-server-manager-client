@@ -186,6 +186,7 @@ public partial class MainForm : Form
 			CurrentUser.LogIn(long.Parse(suspectedPlayer.CommunityId!), secret);
 
 			EnableAllTimers();
+			ProcessesTick();
 		}
 		catch (Exception exception)
 		{
