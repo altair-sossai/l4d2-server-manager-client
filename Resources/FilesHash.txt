@@ -7,11 +7,9 @@
 54c8cecf7a8e7871d35824d32b915c1f 609 left4dead2\cfg\video_bench_very_high.txt
 327b1a578b90b2c2c045e00e5e335f4e 609 left4dead2\cfg\video_bench_very_high_4k.txt
 a61afee7f92df8b10e4786c242ffd925 1670 left4dead2\gameinfo.txt
-f157828d162e3efeb454cbe36a00c04d 48 left4dead2\host.txt
 39a0675ae345270cdbc4388ccb32e672 95 left4dead2\mapcycle.txt
 e485fd348817fa02dbf8e9fadcbc1995 1288 left4dead2\maplist.txt
 4ef544db173c4b108b8dbdd68bb623ca 34 left4dead2\missioncycle.txt
-28e33eebfcc89be69c862bc754fe0dd4 38 left4dead2\motd.txt
 4b73770619159bb6778690189ea7dc0a 211160311 left4dead2\pak01_000.vpk
 7cb3996471bb4c401b7fa25ee66cf2f1 215974762 left4dead2\pak01_001.vpk
 509e0d672824649d0c4cdeeb6968f6b2 209909659 left4dead2\pak01_002.vpk
