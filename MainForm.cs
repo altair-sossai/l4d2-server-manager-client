@@ -60,8 +60,8 @@ public partial class MainForm : Form
 
 	private readonly ServiceProvider _serviceProvider = ServiceProviderFactory.New();
 
-	private bool _fileHashIsValid;
-	private bool _serverIsOn;
+	private bool? _fileHashIsValid;
+	private bool? _serverIsOn;
 
 	public MainForm()
 	{
@@ -236,7 +236,7 @@ public partial class MainForm : Form
 		catch (Exception exception)
 		{
 			Logger.Error(exception, nameof(ServerTick));
-			_serverIsOn = false;
+			_serverIsOn = null;
 		}
 		finally
 		{
@@ -257,7 +257,7 @@ public partial class MainForm : Form
 		catch (Exception exception)
 		{
 			Logger.Error(exception, nameof(FileHashTick));
-			_fileHashIsValid = false;
+			_fileHashIsValid = null;
 		}
 		finally
 		{
@@ -353,16 +353,32 @@ public partial class MainForm : Form
 				return false;
 			}
 
-			if (!_serverIsOn)
+			if (_serverIsOn == null)
+				ServerTick();
+
+			switch (_serverIsOn)
 			{
-				ShowError(@"Servidor desligado");
-				return false;
+				case null:
+					ShowError(@"Não foi possível acessar o servidor");
+					return false;
+
+				case false:
+					ShowError(@"Servidor desligado");
+					return false;
 			}
 
-			if (!_fileHashIsValid)
+			if (_fileHashIsValid == null)
+				FileHashTick();
+
+			switch (_fileHashIsValid)
 			{
-				ShowError(@"Os arquivos do jogo foram modificados");
-				return false;
+				case null:
+					ShowError(@"Não foi possível verificar os arquivos do jogo");
+					return false;
+
+				case false:
+					ShowError(@"Os arquivos do jogo foram modificados");
+					return false;
 			}
 
 			ShowSuccess(@"Anti-cheat em execução");
