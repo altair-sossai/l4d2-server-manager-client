@@ -23,9 +23,16 @@ namespace L4D2AntiCheat;
 public partial class MainForm : Form
 {
 	private static bool _serverTickRunning;
+	private static bool _fileHashTickRunning;
 	private static bool _pingTickRunning;
 	private static bool _screenTickRunning;
 	private static bool _processesTickRunning;
+
+	private readonly Timer _fileHashTimer = new()
+	{
+		Enabled = true,
+		Interval = 60 * 1000
+	};
 
 	private readonly Timer _pingTimer = new()
 	{
@@ -52,6 +59,8 @@ public partial class MainForm : Form
 	};
 
 	private readonly ServiceProvider _serviceProvider = ServiceProviderFactory.New();
+
+	private bool _fileHashIsValid;
 	private bool _serverIsOn;
 
 	public MainForm()
@@ -62,6 +71,7 @@ public partial class MainForm : Form
 		_screenshotTimer.Tick += (_, _) => ScreenshotTick();
 		_processesTimer.Tick += (_, _) => ProcessesTick();
 		_serverTimer.Tick += (_, _) => ServerTick();
+		_fileHashTimer.Tick += (_, _) => FileHashTick();
 	}
 
 	private ILogger Logger => _serviceProvider.GetRequiredService<ILogger>();
@@ -82,7 +92,9 @@ public partial class MainForm : Form
 		try
 		{
 			RefreshSteamAccounts();
+
 			Task.Factory.StartNew(ServerTick);
+			Task.Factory.StartNew(FileHashTick);
 		}
 		catch (Exception exception)
 		{
@@ -232,6 +244,27 @@ public partial class MainForm : Form
 		}
 	}
 
+	private void FileHashTick()
+	{
+		if (_fileHashTickRunning)
+			return;
+
+		try
+		{
+			_fileHashTickRunning = true;
+			_fileHashIsValid = FileHashHelper.IsValid();
+		}
+		catch (Exception exception)
+		{
+			Logger.Error(exception, nameof(FileHashTick));
+			_fileHashIsValid = false;
+		}
+		finally
+		{
+			_fileHashTickRunning = false;
+		}
+	}
+
 	private void PingTick()
 	{
 		if (_pingTickRunning || !AntiCheatIsRunning())
@@ -314,15 +347,21 @@ public partial class MainForm : Form
 	{
 		try
 		{
+			if (!Left4Dead2ProcessHelper.IsRunning())
+			{
+				ShowError(@"Left 4 Dead 2 não esta em execução");
+				return false;
+			}
+
 			if (!_serverIsOn)
 			{
 				ShowError(@"Servidor desligado");
 				return false;
 			}
 
-			if (!Left4Dead2ProcessHelper.IsRunning())
+			if (!_fileHashIsValid)
 			{
-				ShowError(@"Left 4 Dead 2 não esta em execução");
+				ShowError(@"Os arquivos do jogo foram modificados");
 				return false;
 			}
 

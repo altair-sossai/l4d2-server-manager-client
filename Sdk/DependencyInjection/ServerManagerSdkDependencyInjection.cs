@@ -14,12 +14,12 @@ namespace L4D2AntiCheat.Sdk.DependencyInjection;
 public static class ServerManagerSdkDependencyInjection
 {
 #if DEBUG
-    private const string BaseUrl = "http://localhost:7094";
+	private const string BaseUrl = "http://localhost:7094";
 #else
     private const string BaseUrl = "https://l4d2-server-manager-api.azurewebsites.net";
 #endif
 
-    private static readonly JsonSerializerOptions Options = new()
+	private static readonly JsonSerializerOptions Options = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true
