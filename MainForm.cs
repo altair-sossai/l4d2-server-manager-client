@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using L4D2AntiCheat.App.CurrentUser;
 using L4D2AntiCheat.App.UserSecret.Repositories;
@@ -157,16 +156,11 @@ public partial class MainForm : Form
 
 		if (string.IsNullOrEmpty(secret))
 		{
-			UserAlreadyRegistered();
+			ShowError(@"Conta já registrada em outro dispositivo");
 			return;
 		}
 
 		ValidateSecret(suspectedPlayer, secret);
-	}
-
-	private void UserAlreadyRegistered()
-	{
-		ShowError(@"Conta já registrado em outro dispositivo");
 	}
 
 	private void ValidateSecret(SuspectedPlayerResult suspectedPlayer, string secret)
@@ -240,15 +234,12 @@ public partial class MainForm : Form
 
 	private void PingTick()
 	{
-		if (_pingTickRunning)
+		if (_pingTickRunning || !AntiCheatIsRunning())
 			return;
 
 		try
 		{
 			_pingTickRunning = true;
-
-			if (!ServerIsOnAndLeft4Dead2IsRunning())
-				return;
 
 			SuspectedPlayerPingService.PingAsync(new PingCommand()).Wait();
 		}
@@ -264,15 +255,12 @@ public partial class MainForm : Form
 
 	private void ScreenshotTick()
 	{
-		if (_screenTickRunning)
+		if (_screenTickRunning || !AntiCheatIsRunning() || !Left4Dead2ProcessHelper.IsFocused())
 			return;
 
 		try
 		{
 			_screenTickRunning = true;
-
-			if (!ServerIsOnAndLeft4Dead2IsRunning() || !Left4Dead2ProcessHelper.IsFocused())
-				return;
 
 			var result = SuspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
 			if (string.IsNullOrEmpty(result.Url))
@@ -298,15 +286,12 @@ public partial class MainForm : Form
 
 	private void ProcessesTick()
 	{
-		if (_processesTickRunning)
+		if (_processesTickRunning || !AntiCheatIsRunning())
 			return;
 
 		try
 		{
 			_processesTickRunning = true;
-
-			if (!ServerIsOnAndLeft4Dead2IsRunning())
-				return;
 
 			var commands = Process.GetProcesses()
 				.Where(process => process.Id != 0 && process.MainWindowHandle != IntPtr.Zero)
@@ -325,23 +310,31 @@ public partial class MainForm : Form
 		}
 	}
 
-	private bool ServerIsOnAndLeft4Dead2IsRunning()
+	private bool AntiCheatIsRunning()
 	{
-		if (!_serverIsOn)
+		try
 		{
-			ShowError(@"Servidor desligado");
+			if (!_serverIsOn)
+			{
+				ShowError(@"Servidor desligado");
+				return false;
+			}
+
+			if (!Left4Dead2ProcessHelper.IsRunning())
+			{
+				ShowError(@"Left 4 Dead 2 não esta em execução");
+				return false;
+			}
+
+			ShowSuccess(@"Anti-cheat em execução");
+
+			return true;
+		}
+		catch (Exception exception)
+		{
+			Logger.Error(exception, nameof(AntiCheatIsRunning));
 			return false;
 		}
-
-		if (!Left4Dead2ProcessHelper.IsRunning())
-		{
-			ShowError(@"Left 4 Dead 2 não esta em execução");
-			return false;
-		}
-
-		ShowSuccess(@"Anti-cheat em execução");
-
-		return true;
 	}
 
 	private void ShowInfo(string message)
