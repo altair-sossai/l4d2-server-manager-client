@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace L4D2AntiCheat.Infrastructure.Helpers;
 
@@ -17,21 +18,28 @@ public static class FileHashHelper
 
 		var content = EmbeddedResourceHelper.ReadAllText("L4D2AntiCheat.Resources.FilesHash.txt");
 
-		return !string.IsNullOrEmpty(content) 
-		       && content.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).All(path => IsValid(directoryInfo.FullName, path));
+		return !string.IsNullOrEmpty(content)
+		       && content.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).All(path => IsValid(process, directoryInfo.FullName, path));
 	}
 
-	private static bool IsValid(string gameFolder, string item)
+	private static bool IsValid(Process process, string folder, string item)
 	{
 		var segments = item.Split(' ', 3);
 		var md5 = segments[0];
 		var length = long.Parse(segments[1]);
 		var relativePath = segments[2];
 
-		var filePath = Path.Combine(gameFolder, relativePath);
+		var filePath = Path.Combine(folder, relativePath);
 		var fileInfo = new FileInfo(filePath);
+		var startTime = process.StartTime;
 
-		return fileInfo.Exists && fileInfo.Length == length && Md5(filePath) == md5;
+		var valid = fileInfo.Exists
+			&& fileInfo.Length == length
+			&& startTime > fileInfo.CreationTime
+			&& startTime > fileInfo.LastWriteTime
+			&& Md5(filePath) == md5;
+
+		return valid;
 	}
 
 	private static string Md5(string filename)
@@ -39,7 +47,7 @@ public static class FileHashHelper
 		using var md5 = MD5.Create();
 		using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
 
-		var buffer = new byte[1024 * 1000];
+		var buffer = new byte[1024 * 1000 * 10];
 		_ = stream.Read(buffer, 0, buffer.Length);
 
 		var hash = md5.ComputeHash(buffer);
