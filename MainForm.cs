@@ -31,7 +31,7 @@ public partial class MainForm : Form
 	private readonly Timer _fileHashTimer = new()
 	{
 		Enabled = true,
-		Interval = 60 * 1000
+		Interval = 90 * 1000
 	};
 
 	private readonly Timer _pingTimer = new()
