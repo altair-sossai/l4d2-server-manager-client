@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using L4D2AntiCheat.Sdk.Handlers;
+using L4D2AntiCheat.Sdk.ServerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Services;
-using L4D2AntiCheat.Sdk.VirtualMachine.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 
@@ -34,7 +34,7 @@ public static class ServerManagerSdkDependencyInjection
     {
         serviceCollection.AddTransient<AuthorizationHeaderHandler>();
 
-        serviceCollection.AddRefitService<IVirtualMachineService>();
+        serviceCollection.AddRefitService<IServerPingService>();
 
         serviceCollection.AddRefitService<ISuspectedPlayerService>();
         serviceCollection.AddRefitService<ISuspectedPlayerSecretService>();

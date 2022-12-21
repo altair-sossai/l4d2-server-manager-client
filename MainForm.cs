@@ -4,6 +4,7 @@ using L4D2AntiCheat.App.UserSecret.Repositories;
 using L4D2AntiCheat.App.UserSecret.Services;
 using L4D2AntiCheat.DependencyInjection;
 using L4D2AntiCheat.Infrastructure.Helpers;
+using L4D2AntiCheat.Sdk.ServerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
@@ -13,7 +14,6 @@ using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Services;
-using L4D2AntiCheat.Sdk.VirtualMachine.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Timer = System.Windows.Forms.Timer;
@@ -76,7 +76,7 @@ public partial class MainForm : Form
 
 	private ILogger Logger => _serviceProvider.GetRequiredService<ILogger>();
 	private ICurrentUser CurrentUser => _serviceProvider.GetRequiredService<ICurrentUser>();
-	private IVirtualMachineService VirtualMachineService => _serviceProvider.GetRequiredService<IVirtualMachineService>();
+	private IServerPingService ServerPingService => _serviceProvider.GetRequiredService<IServerPingService>();
 	private IUserSecretService UserSecretService => _serviceProvider.GetRequiredService<IUserSecretService>();
 	private IUserSecretRepository UserSecretRepository => _serviceProvider.GetRequiredService<IUserSecretRepository>();
 	private ISuspectedPlayerService SuspectedPlayerService => _serviceProvider.GetRequiredService<ISuspectedPlayerService>();
@@ -229,9 +229,9 @@ public partial class MainForm : Form
 		{
 			_serverTickRunning = true;
 
-			var virtualMachine = VirtualMachineService.InfoAsync().Result;
+			var result = ServerPingService.GetAsync().Result;
 
-			_serverIsOn = virtualMachine.IsOn;
+			_serverIsOn = result.IsOn;
 		}
 		catch (Exception exception)
 		{
