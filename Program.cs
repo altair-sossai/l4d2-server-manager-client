@@ -1,4 +1,6 @@
 using L4D2AntiCheat.DependencyInjection;
+using L4D2AntiCheat.Forms;
+using L4D2AntiCheat.Infrastructure.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -12,11 +14,12 @@ internal static class Program
 		ApplicationConfiguration.Initialize();
 
 		using var serviceProvider = ServiceProviderFactory.New();
-		var mainForm = serviceProvider.GetRequiredService<MainForm>();
+
+		Form form = OptInHelper.Accepted() ? serviceProvider.GetRequiredService<MainForm>() : serviceProvider.GetRequiredService<OptInForm>();
 
 		AppDomain.CurrentDomain.UnhandledException += UnhandledException;
 
-		Application.Run(mainForm);
+		Application.Run(form);
 	}
 
 	private static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
