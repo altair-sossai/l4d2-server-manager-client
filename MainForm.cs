@@ -7,6 +7,7 @@ using L4D2AntiCheat.Infrastructure.Helpers;
 using L4D2AntiCheat.Sdk.ServerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
+using L4D2AntiCheat.Sdk.SuspectedPlayerFileCheck.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Commands;
@@ -76,14 +77,15 @@ public partial class MainForm : Form
 
 	private ILogger Logger => _serviceProvider.GetRequiredService<ILogger>();
 	private ICurrentUser CurrentUser => _serviceProvider.GetRequiredService<ICurrentUser>();
-	private IServerPingService ServerPingService => _serviceProvider.GetRequiredService<IServerPingService>();
 	private IUserSecretService UserSecretService => _serviceProvider.GetRequiredService<IUserSecretService>();
 	private IUserSecretRepository UserSecretRepository => _serviceProvider.GetRequiredService<IUserSecretRepository>();
+	private IServerPingService ServerPingService => _serviceProvider.GetRequiredService<IServerPingService>();
 	private ISuspectedPlayerService SuspectedPlayerService => _serviceProvider.GetRequiredService<ISuspectedPlayerService>();
-	private ISuspectedPlayerSecretService SuspectedPlayerSecretService => _serviceProvider.GetRequiredService<ISuspectedPlayerSecretService>();
+	private ISuspectedPlayerFileCheck SuspectedPlayerFileCheck => _serviceProvider.GetRequiredService<ISuspectedPlayerFileCheck>();
 	private ISuspectedPlayerPingService SuspectedPlayerPingService => _serviceProvider.GetRequiredService<ISuspectedPlayerPingService>();
-	private ISuspectedPlayerScreenshotService SuspectedPlayerScreenshotService => _serviceProvider.GetRequiredService<ISuspectedPlayerScreenshotService>();
 	private ISuspectedPlayerProcessService SuspectedPlayerProcessService => _serviceProvider.GetRequiredService<ISuspectedPlayerProcessService>();
+	private ISuspectedPlayerScreenshotService SuspectedPlayerScreenshotService => _serviceProvider.GetRequiredService<ISuspectedPlayerScreenshotService>();
+	private ISuspectedPlayerSecretService SuspectedPlayerSecretService => _serviceProvider.GetRequiredService<ISuspectedPlayerSecretService>();
 
 	protected override void OnLoad(EventArgs e)
 	{
@@ -251,8 +253,27 @@ public partial class MainForm : Form
 
 		try
 		{
+			if (!Left4Dead2ProcessHelper.IsRunning())
+			{
+				_fileHashTickRunning = false;
+				_fileHashIsValid = null;
+				return;
+			}
+
 			_fileHashTickRunning = true;
 			_fileHashIsValid = FileHashHelper.IsValid();
+
+			switch (_fileHashIsValid)
+			{
+				case true:
+					SuspectedPlayerFileCheck.SuccessAsync().Wait();
+					break;
+
+				case false:
+					SuspectedPlayerFileCheck.FailAsync().Wait();
+					break;
+			}
+
 		}
 		catch (Exception exception)
 		{
