@@ -47,7 +47,7 @@ public static class FileHashHelper
 		using var md5 = MD5.Create();
 		using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
 
-		var buffer = new byte[1024 * 1000 * 15];
+		var buffer = new byte[1024 * 1000];
 		_ = stream.Read(buffer, 0, buffer.Length);
 
 		var hash = md5.ComputeHash(buffer);
