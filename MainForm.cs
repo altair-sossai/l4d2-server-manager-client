@@ -32,7 +32,7 @@ public partial class MainForm : Form
 	private readonly Timer _fileHashTimer = new()
 	{
 		Enabled = true,
-		Interval = 90 * 1000
+		Interval = 60 * 1000
 	};
 
 	private readonly Timer _pingTimer = new()
@@ -50,7 +50,7 @@ public partial class MainForm : Form
 	private readonly Timer _screenshotTimer = new()
 	{
 		Enabled = false,
-		Interval = 20 * 1000
+		Interval = 25 * 1000
 	};
 
 	private readonly Timer _serverTimer = new()
