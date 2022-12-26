@@ -12,8 +12,8 @@ public interface ISuspectedPlayerScreenshotService
 
     public void Upload(string url, Bitmap screenshot)
     {
-        var width = Math.Min(screenshot.Width, 1600);
-        var height = Math.Min(screenshot.Height, 900);
+        var width = Math.Min(screenshot.Width, 1280);
+        var height = Math.Min(screenshot.Height, 720);
 
         using var bitmap = new Bitmap(screenshot, width, height);
         using var memoryStream = bitmap.Compress();
