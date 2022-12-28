@@ -1327,3 +1327,4 @@ b27c5a5830292eaba699d4fa570c9426 50924 update\sound\weapons\smg_silenced\gunothe
 b7cd80d92b9ad5295d846bf850d4f6e3 66762 update\sound\weapons\smg_silenced\gunother\smg_slideback_1.wav
 3fa4ae913c1cee85ec27d69010913d7e 48138 update\sound\weapons\smg_silenced\gunother\smg_slideforward_1.wav
 80f40d5d325afa8046097ce5bd596a97 121796 update\sound\weapons\tonfa\tonfa_deploy_1.wav
+a736f67f8b588e9204186b81971fbea7 365056 left4dead2.exe
