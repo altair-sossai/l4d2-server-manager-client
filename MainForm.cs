@@ -111,7 +111,7 @@ public partial class MainForm : Form
 		var comboBox = sender as ComboBox;
 
 		if (comboBox?.DataSource is List<SuspectedPlayerResult> { Count: 0 })
-			ShowError(@"Nenhuma conta encontrada");
+			ShowError(@"Nenhuma conta encontrada", "O dispositivo atual não possui nenhuma conta Steam registrada como suspeita, clique em 'Atualizar' para tentar novamente.");
 	}
 
 	private void SteamAccountComboBox_SelectedValueChanged(object? sender, EventArgs e)
@@ -135,6 +135,7 @@ public partial class MainForm : Form
 		}
 		catch (Exception exception)
 		{
+			ShowError("Erro ao validar a conta", "Clique em 'Atualizar' para tentar novamente.");
 			Logger.Error(exception, nameof(SteamAccountComboBox_SelectedValueChanged));
 		}
 	}
@@ -170,7 +171,7 @@ public partial class MainForm : Form
 
 		if (string.IsNullOrEmpty(secret))
 		{
-			ShowError(@"Conta já registrada em outro dispositivo");
+			ShowError(@"Conta já registrada em outro dispositivo", "A conta atual já está registrada em outro dispositivo, solicite ao administrador que resete seus dados de cadastro e tente novamente.");
 			return;
 		}
 
@@ -205,7 +206,7 @@ public partial class MainForm : Form
 
 	private void SecretInvalid()
 	{
-		ShowError(@"Não foi possível validar o dispositivo atual");
+		ShowError(@"Não foi possível validar o dispositivo atual", "Clique em 'Atualizar' para tentar novamente.");
 	}
 
 	private void DisableAllTimers()
@@ -253,11 +254,18 @@ public partial class MainForm : Form
 
 		try
 		{
-			if (!Left4Dead2ProcessHelper.IsRunning())
+			var running = Left4Dead2ProcessHelper.IsRunning();
+
+			switch (running)
 			{
-				_fileHashTickRunning = false;
-				_fileHashIsValid = null;
-				return;
+				case true when _fileHashIsValid == false:
+					_fileHashTickRunning = false;
+					return;
+
+				case false:
+					_fileHashTickRunning = false;
+					_fileHashIsValid = null;
+					return;
 			}
 
 			_fileHashTickRunning = true;
@@ -273,7 +281,6 @@ public partial class MainForm : Form
 					SuspectedPlayerFileCheck.FailAsync().Wait();
 					break;
 			}
-
 		}
 		catch (Exception exception)
 		{
@@ -376,7 +383,7 @@ public partial class MainForm : Form
 
 			if (Screen.AllScreens.Length != 1)
 			{
-				ShowError(@"Utilize apenas 1 monitor, remova os outros");
+				ShowError(@"Utilize apenas 1 monitor", "O Anti-cheat atualmente não dá suporte a vários monitores, por favor, utilize apenas um durante os jogos.");
 				return false;
 			}
 
@@ -404,7 +411,7 @@ public partial class MainForm : Form
 					return false;
 
 				case false:
-					ShowError(@"Os arquivos do jogo foram modificados");
+					ShowError(@"Os arquivos do jogo foram modificados", "Feche o jogo, restaure os arquivos do game e tente novamente");
 					return false;
 			}
 
@@ -419,24 +426,27 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void ShowInfo(string message)
+	private void ShowInfo(string message, string? details = null)
 	{
 		StatusTextBox.ForeColor = Color.White;
 		StatusTextBox.Font = new Font(StatusTextBox.Font, FontStyle.Regular);
 		StatusTextBox.Text = message;
+		DetailsLabel.Text = details;
 	}
 
-	private void ShowError(string message)
+	private void ShowError(string message, string? details = null)
 	{
 		StatusTextBox.ForeColor = Color.Red;
 		StatusTextBox.Font = new Font(StatusTextBox.Font, FontStyle.Bold);
 		StatusTextBox.Text = message;
+		DetailsLabel.Text = details;
 	}
 
-	private void ShowSuccess(string message)
+	private void ShowSuccess(string message, string? details = null)
 	{
 		StatusTextBox.ForeColor = Color.LimeGreen;
 		StatusTextBox.Font = new Font(StatusTextBox.Font, FontStyle.Regular);
 		StatusTextBox.Text = message;
+		DetailsLabel.Text = details;
 	}
 }
