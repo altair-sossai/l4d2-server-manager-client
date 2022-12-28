@@ -374,6 +374,12 @@ public partial class MainForm : Form
 				return false;
 			}
 
+			if (Screen.AllScreens.Length != 1)
+			{
+				ShowError(@"Utilize apenas 1 (um) monitor, remova todos os outros");
+				return false;
+			}
+
 			if (_serverIsOn == null)
 				ServerTick();
 
