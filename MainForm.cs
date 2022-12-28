@@ -376,7 +376,7 @@ public partial class MainForm : Form
 
 			if (Screen.AllScreens.Length != 1)
 			{
-				ShowError(@"Utilize apenas 1 (um) monitor, remova todos os outros");
+				ShowError(@"Utilize apenas 1 monitor, remova os outros");
 				return false;
 			}
 
