@@ -50,7 +50,7 @@ public partial class MainForm : Form
 	private readonly Timer _screenshotTimer = new()
 	{
 		Enabled = false,
-		Interval = 25 * 1000
+		Interval = 15 * 1000
 	};
 
 	private readonly Timer _serverTimer = new()
