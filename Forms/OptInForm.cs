@@ -21,11 +21,11 @@ public partial class OptInForm : Form
 		OptInHelper.Accept();
 
 		using var serviceProvider = ServiceProviderFactory.New();
-		var mainForm = serviceProvider.GetRequiredService<MainForm>();
-		mainForm.Closed += (_, _) => Application.Exit();
+		var startupForm = serviceProvider.GetRequiredService<StartupForm>();
+		startupForm.Closed += (_, _) => Application.Exit();
 
 		Hide();
 
-		mainForm.ShowDialog(this);
+		startupForm.ShowDialog(this);
 	}
 }

@@ -420,6 +420,12 @@ public partial class MainForm : Form
 					return false;
 			}
 
+			if (SteamProcessHelper.WasClosed())
+			{
+				ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
+				return false;
+			}
+
 			ShowSuccess(@"Anti-cheat em execução");
 
 			return true;

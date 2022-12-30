@@ -15,7 +15,7 @@ internal static class Program
 
 		using var serviceProvider = ServiceProviderFactory.New();
 
-		Form form = OptInHelper.Accepted() ? serviceProvider.GetRequiredService<MainForm>() : serviceProvider.GetRequiredService<OptInForm>();
+		Form form = OptInHelper.Accepted() ? serviceProvider.GetRequiredService<StartupForm>() : serviceProvider.GetRequiredService<OptInForm>();
 
 		AppDomain.CurrentDomain.UnhandledException += UnhandledException;
 

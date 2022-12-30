@@ -4,6 +4,13 @@ namespace L4D2AntiCheat.Infrastructure.Helpers;
 
 public static class RegistryHelper
 {
+	public static string? SteamExe()
+	{
+		var steam = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Valve\Steam");
+
+		return steam?.GetValue("SteamExe")?.ToString()?.Trim();
+	}
+
 	public static IEnumerable<long> SteamUsers()
 	{
 		var users = new HashSet<long>();
