@@ -4,37 +4,71 @@ namespace L4D2AntiCheat.Infrastructure.Helpers;
 
 public static class RegistryHelper
 {
-    public static IEnumerable<long> SteamUsers()
-    {
-        var currentUser = Registry.CurrentUser;
-        var registryKey = currentUser.OpenSubKey(@"SOFTWARE\Valve\Steam\Users");
-        if (registryKey == null)
-            return new List<long>();
+	public static IEnumerable<long> SteamUsers()
+	{
+		var users = new HashSet<long>();
+		var currentUser = Registry.CurrentUser;
 
-        var keys = registryKey.GetSubKeyNames();
-        var identifiers = keys
-            .Select(key => $"[U:1:{key}]")
-            .Select(SteamIdHelper.Steam3ToCommunityId)
-            .Where(w => w.HasValue)
-            .Cast<long>();
+		foreach (var user in SteamUsers(currentUser))
+			users.Add(user);
 
-        return identifiers;
-    }
+		var activeUser = ActiveUser(currentUser);
+		if (activeUser.HasValue)
+			users.Add(activeUser.Value);
 
-    public static void CreateIfDoesNotExist(string fullName)
-    {
-        var registry = Registry.CurrentUser;
+		return users;
+	}
 
-        foreach (var name in fullName.Split('\\', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var subkey = registry.OpenSubKey(name, true);
-            if (subkey != null)
-            {
-                registry = subkey;
-                continue;
-            }
+	private static IEnumerable<long> SteamUsers(RegistryKey registryKey)
+	{
+		var users = registryKey.OpenSubKey(@"SOFTWARE\Valve\Steam\Users");
+		if (users == null)
+			return Array.Empty<long>();
 
-            registry = registry.CreateSubKey(name, RegistryKeyPermissionCheck.Default);
-        }
-    }
+		var keys = users.GetSubKeyNames();
+		var identifiers = keys
+			.Select(CommunityId)
+			.Where(w => w.HasValue)
+			.Cast<long>();
+
+		return identifiers;
+	}
+
+	private static long? ActiveUser(RegistryKey registryKey)
+	{
+		var activeProcess = registryKey.OpenSubKey(@"SOFTWARE\Valve\Steam\ActiveProcess");
+		if (activeProcess == null)
+			return null;
+
+		var activeUser = activeProcess.GetValue("ActiveUser")?.ToString()?.Trim();
+		if (string.IsNullOrEmpty(activeUser) || activeUser == "0")
+			return null;
+
+		return CommunityId(activeUser);
+	}
+
+	private static long? CommunityId(string user)
+	{
+		var steam3 = $"[U:1:{user}]";
+		var communityId = SteamIdHelper.Steam3ToCommunityId(steam3);
+
+		return communityId;
+	}
+
+	public static void CreateIfDoesNotExist(string fullName)
+	{
+		var registry = Registry.CurrentUser;
+
+		foreach (var name in fullName.Split('\\', StringSplitOptions.RemoveEmptyEntries))
+		{
+			var subkey = registry.OpenSubKey(name, true);
+			if (subkey != null)
+			{
+				registry = subkey;
+				continue;
+			}
+
+			registry = registry.CreateSubKey(name, RegistryKeyPermissionCheck.Default);
+		}
+	}
 }
