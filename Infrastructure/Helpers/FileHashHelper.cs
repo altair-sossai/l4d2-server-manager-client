@@ -5,6 +5,9 @@ namespace L4D2AntiCheat.Infrastructure.Helpers;
 
 public static class FileHashHelper
 {
+	private static readonly string FilesHashContent = EmbeddedResourceHelper.ReadAllText("L4D2AntiCheat.Resources.FilesHash.txt")!;
+	private static readonly string[] Lines = FilesHashContent.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
 	public static bool IsValid()
 	{
 		var process = Left4Dead2ProcessHelper.GetProcess();
@@ -13,18 +16,30 @@ public static class FileHashHelper
 
 		var fileInfo = new FileInfo(process.MainModule.FileName);
 		var directoryInfo = fileInfo.Directory;
-		if (directoryInfo == null)
-			return false;
 
-		var content = EmbeddedResourceHelper.ReadAllText("L4D2AntiCheat.Resources.FilesHash.txt");
-
-		return !string.IsNullOrEmpty(content)
-		       && content.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).All(path => IsValid(process, directoryInfo.FullName, path));
+		return directoryInfo != null && Lines.All(path => IsValid(process, directoryInfo.FullName, path));
 	}
 
-	private static bool IsValid(Process process, string folder, string item)
+	public static IEnumerable<string> InvalidFiles()
 	{
-		var segments = item.Split(' ', 3);
+		var process = Left4Dead2ProcessHelper.GetProcess();
+		if (string.IsNullOrEmpty(process?.MainModule?.FileName))
+			return Array.Empty<string>();
+
+		var fileInfo = new FileInfo(process.MainModule.FileName);
+		var directoryInfo = fileInfo.Directory;
+
+		if (directoryInfo == null)
+			return Array.Empty<string>();
+
+		return Lines
+			.Where(path => !IsValid(process, directoryInfo.FullName, path))
+			.Select(line => line.Split(' ', 3).Last());
+	}
+
+	private static bool IsValid(Process process, string folder, string line)
+	{
+		var segments = line.Split(' ', 3);
 		var md5 = segments[0];
 		var length = long.Parse(segments[1]);
 		var relativePath = segments[2];
@@ -34,10 +49,10 @@ public static class FileHashHelper
 		var startTime = process.StartTime;
 
 		var valid = fileInfo.Exists
-			&& fileInfo.Length == length
-			&& startTime > fileInfo.CreationTime
-			&& startTime > fileInfo.LastWriteTime
-			&& Md5(filePath) == md5;
+		            && fileInfo.Length == length
+		            && startTime > fileInfo.CreationTime
+		            && startTime > fileInfo.LastWriteTime
+		            && Md5(filePath) == md5;
 
 		return valid;
 	}

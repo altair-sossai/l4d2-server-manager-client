@@ -8,6 +8,7 @@ using L4D2AntiCheat.Sdk.ServerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerFileCheck.Services;
+using L4D2AntiCheat.Sdk.SuspectedPlayerFileFail.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Commands;
@@ -278,7 +279,9 @@ public partial class MainForm : Form
 					break;
 
 				case false:
-					SuspectedPlayerFileCheck.FailAsync().Wait();
+					var invalidFiles = FileHashHelper.InvalidFiles();
+					var commands = SuspectedPlayerFileFailCommand.Parse(invalidFiles);
+					SuspectedPlayerFileCheck.FailAsync(commands).Wait();
 					break;
 			}
 		}
@@ -381,11 +384,13 @@ public partial class MainForm : Form
 				return false;
 			}
 
+#if !DEBUG
 			if (Screen.AllScreens.Length != 1)
 			{
 				ShowError(@"Utilize apenas 1 monitor", "O Anti-cheat atualmente não dá suporte a vários monitores, por favor, utilize apenas um durante os jogos.");
 				return false;
 			}
+#endif
 
 			if (_serverIsOn == null)
 				ServerTick();
