@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Security.Cryptography;
 
 namespace L4D2AntiCheat.Infrastructure.Helpers;
 
@@ -52,21 +51,8 @@ public static class FileHashHelper
 		            && fileInfo.Length == length
 		            && startTime > fileInfo.CreationTime
 		            && startTime > fileInfo.LastWriteTime
-		            && Md5(filePath) == md5;
+		            && Md5Helper.Md5(filePath) == md5;
 
 		return valid;
-	}
-
-	private static string Md5(string filename)
-	{
-		using var md5 = MD5.Create();
-		using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
-
-		var buffer = new byte[1024 * 1000];
-		_ = stream.Read(buffer, 0, buffer.Length);
-
-		var hash = md5.ComputeHash(buffer);
-
-		return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
 	}
 }
