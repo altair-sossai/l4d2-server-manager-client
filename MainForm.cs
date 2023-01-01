@@ -112,7 +112,7 @@ public partial class MainForm : Form
 		var comboBox = sender as ComboBox;
 
 		if (comboBox?.DataSource is List<SuspectedPlayerResult> { Count: 0 })
-			ShowError(@"Nenhuma conta encontrada", "O dispositivo atual n�o possui nenhuma conta Steam registrada como suspeita, clique em 'Atualizar' para tentar novamente.");
+			ShowError(@"Nenhuma conta encontrada", "O dispositivo atual não possui nenhuma conta Steam registrada como suspeita, clique em 'Atualizar' para tentar novamente.");
 	}
 
 	private void SteamAccountComboBox_SelectedValueChanged(object? sender, EventArgs e)
@@ -172,7 +172,7 @@ public partial class MainForm : Form
 
 		if (string.IsNullOrEmpty(secret))
 		{
-			ShowError(@"Conta j� registrada em outro dispositivo", "A conta atual j� est� registrada em outro dispositivo, solicite ao administrador que resete seus dados de cadastro e tente novamente.");
+			ShowError(@"Conta já registrada em outro dispositivo", "A conta atual já está registrada em outro dispositivo, solicite ao administrador que resete seus dados de cadastro e tente novamente.");
 			return;
 		}
 
@@ -207,7 +207,7 @@ public partial class MainForm : Form
 
 	private void SecretInvalid()
 	{
-		ShowError(@"N�o foi poss�vel validar o dispositivo atual", "Clique em 'Atualizar' para tentar novamente.");
+		ShowError(@"Não foi possível validar o dispositivo atual", "Clique em 'Atualizar' para tentar novamente.");
 	}
 
 	private void DisableAllTimers()
@@ -380,14 +380,14 @@ public partial class MainForm : Form
 		{
 			if (!Left4Dead2ProcessHelper.IsRunning())
 			{
-				ShowError(@"Left 4 Dead 2 n�o esta em execu��o");
+				ShowError(@"Left 4 Dead 2 não esta em execução");
 				return false;
 			}
 
 #if !DEBUG
 			if (Screen.AllScreens.Length != 1)
 			{
-				ShowError(@"Utilize apenas 1 monitor", "O Anti-cheat atualmente n�o d� suporte a v�rios monitores, por favor, utilize apenas um durante os jogos.");
+				ShowError(@"Utilize apenas 1 monitor", "O Anti-cheat atualmente não dá suporte a vários monitores, por favor, utilize apenas um durante os jogos.");
 				return false;
 			}
 #endif
@@ -398,7 +398,7 @@ public partial class MainForm : Form
 			switch (_serverIsOn)
 			{
 				case null:
-					ShowError(@"N�o foi poss�vel acessar o servidor");
+					ShowError(@"Não foi possível acessar o servidor");
 					return false;
 
 				case false:
@@ -412,7 +412,7 @@ public partial class MainForm : Form
 			switch (_fileHashIsValid)
 			{
 				case null:
-					ShowError(@"N�o foi poss�vel verificar os arquivos do jogo");
+					ShowError(@"Não foi possível verificar os arquivos do jogo");
 					return false;
 
 				case false:
@@ -426,7 +426,7 @@ public partial class MainForm : Form
 				return false;
 			}
 
-			ShowSuccess(@"Anti-cheat em execu��o");
+			ShowSuccess(@"Anti-cheat em execução");
 
 			return true;
 		}
