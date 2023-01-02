@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using L4D2AntiCheat.DependencyInjection;
 using L4D2AntiCheat.Forms;
 using L4D2AntiCheat.Infrastructure.Helpers;
@@ -8,6 +9,16 @@ namespace L4D2AntiCheat;
 
 internal static class Program
 {
+	static Program()
+	{
+#if DEBUG
+		var processes = Process.GetProcessesByName("steam");
+		var process = processes.FirstOrDefault();
+		if (process != null)
+			SteamProcessHelper.SetCurrentProcess(process);
+#endif
+	}
+
 	[STAThread]
 	private static void Main()
 	{
@@ -15,9 +26,13 @@ internal static class Program
 
 		using var serviceProvider = ServiceProviderFactory.New();
 
+		AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+
 		Form form = OptInHelper.Accepted() ? serviceProvider.GetRequiredService<StartupForm>() : serviceProvider.GetRequiredService<OptInForm>();
 
-		AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+#if DEBUG
+		form = serviceProvider.GetRequiredService<MainForm>();
+#endif
 
 		Application.Run(form);
 	}
