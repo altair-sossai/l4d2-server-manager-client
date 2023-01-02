@@ -16,13 +16,13 @@ public partial class StartupForm : Form
 	{
 		if (Left4Dead2ProcessHelper.IsRunning())
 		{
-			MessageBox.Show(@"Feche o jogo (Left 4 Dead 2) e tenta outra vez", @"Atenção!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(@"Por favor, para prosseguir feche o jogo (Left 4 Dead 2)", @"Atenção!", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			return;
 		}
 
 		if (SteamProcessHelper.IsRunning())
 		{
-			MessageBox.Show(@"Feche a Steam e tenta outra vez", @"Atenção!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(@"Por favor, para prosseguir feche a Steam", @"Atenção!", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			return;
 		}
 
@@ -37,7 +37,8 @@ public partial class StartupForm : Form
 		var processStartInfo = new ProcessStartInfo
 		{
 			FileName = fileInfo.FullName,
-			WorkingDirectory = fileInfo.DirectoryName!
+			WorkingDirectory = fileInfo.DirectoryName!,
+			Arguments = "-applaunch 550"
 		};
 
 		var process = Process.Start(processStartInfo);
@@ -48,6 +49,16 @@ public partial class StartupForm : Form
 		}
 
 		SteamProcessHelper.SetCurrentProcess(process);
+		Thread.Sleep(3000);
+
+		if (!Left4Dead2ProcessHelper.CatchCurrentProcess())
+		{
+			SteamProcessHelper.Clear();
+			Left4Dead2ProcessHelper.Clear();
+
+			MessageBox.Show(@"Falha ao iniciar o jogo, tente novamente", @"Atenção!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			return;
+		}
 
 		using var serviceProvider = ServiceProviderFactory.New();
 		var mainForm = serviceProvider.GetRequiredService<MainForm>();

@@ -9,7 +9,7 @@ public static class FileHashHelper
 
 	public static bool IsValid()
 	{
-		var process = Left4Dead2ProcessHelper.GetProcess();
+		var process = Left4Dead2ProcessHelper.CurrentProcess;
 		if (string.IsNullOrEmpty(process?.MainModule?.FileName))
 			return false;
 
@@ -21,7 +21,7 @@ public static class FileHashHelper
 
 	public static IEnumerable<string> InvalidFiles()
 	{
-		var process = Left4Dead2ProcessHelper.GetProcess();
+		var process = Left4Dead2ProcessHelper.CurrentProcess;
 		if (string.IsNullOrEmpty(process?.MainModule?.FileName))
 			return Array.Empty<string>();
 

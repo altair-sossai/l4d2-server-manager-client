@@ -7,6 +7,8 @@ public static class SteamProcessHelper
 	private const string ProcessName = "steam";
 	private static Process? _currentProcess;
 
+	public static Process? CurrentProcess => _currentProcess?.HasExited ?? false ? null : _currentProcess;
+
 	public static void SetCurrentProcess(Process process)
 	{
 		_currentProcess = process;
@@ -28,6 +30,11 @@ public static class SteamProcessHelper
 			return true;
 
 		return currentProcess.Id != process.Id;
+	}
+
+	public static void Clear()
+	{
+		_currentProcess = null;
 	}
 
 	private static Process? FindProcess()

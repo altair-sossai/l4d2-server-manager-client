@@ -330,7 +330,7 @@ public partial class MainForm : Form
 			if (string.IsNullOrEmpty(result.Url))
 				return;
 
-			var process = Left4Dead2ProcessHelper.GetProcess();
+			var process = Left4Dead2ProcessHelper.CurrentProcess;
 			if (process == null)
 				return;
 
@@ -378,6 +378,18 @@ public partial class MainForm : Form
 	{
 		try
 		{
+			if (SteamProcessHelper.WasClosed())
+			{
+				ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
+				return false;
+			}
+
+			if (Left4Dead2ProcessHelper.WasClosed())
+			{
+				ShowError(@"Left 4 Dead 2 foi fechado", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
+				return false;
+			}
+
 			if (!Left4Dead2ProcessHelper.IsRunning())
 			{
 				ShowError(@"Left 4 Dead 2 não esta em execução");
@@ -418,12 +430,6 @@ public partial class MainForm : Form
 				case false:
 					ShowError(@"Os arquivos do jogo foram modificados", "Feche o jogo, restaure os arquivos do game e tente novamente");
 					return false;
-			}
-
-			if (SteamProcessHelper.WasClosed())
-			{
-				ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
-				return false;
 			}
 
 			ShowSuccess(@"Anti-cheat em execução");

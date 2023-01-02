@@ -31,7 +31,7 @@ internal static class Program
 		Form form = OptInHelper.Accepted() ? serviceProvider.GetRequiredService<StartupForm>() : serviceProvider.GetRequiredService<OptInForm>();
 
 #if DEBUG
-		form = serviceProvider.GetRequiredService<MainForm>();
+		form = serviceProvider.GetRequiredService<StartupForm>();
 #endif
 
 		Application.Run(form);

@@ -65,23 +65,22 @@ namespace L4D2AntiCheat.Forms
 			this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-			this.label3.Location = new System.Drawing.Point(12, 103);
+			this.label3.Location = new System.Drawing.Point(12, 96);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(279, 115);
+			this.label3.Size = new System.Drawing.Size(279, 90);
 			this.label3.TabIndex = 3;
-			this.label3.Text = "● Feche o jogo (Left 4 Dead 2)\r\n\r\n● Feche a Steam\r\n\r\n● Clique no botão abaixo\r\n\r\n" +
-    "● Aguarde a Steam iniciar e inicie o jogo\r\n";
+			this.label3.Text = "● Feche o jogo (Left 4 Dead 2)\r\n\r\n● Feche a Steam\r\n\r\n● Clique no botão \'Iniciar\'";
 			// 
 			// OpenSteamButton
 			// 
 			this.OpenSteamButton.BackColor = System.Drawing.SystemColors.Highlight;
 			this.OpenSteamButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
 			this.OpenSteamButton.ForeColor = System.Drawing.Color.White;
-			this.OpenSteamButton.Location = new System.Drawing.Point(12, 238);
+			this.OpenSteamButton.Location = new System.Drawing.Point(12, 198);
 			this.OpenSteamButton.Name = "OpenSteamButton";
 			this.OpenSteamButton.Size = new System.Drawing.Size(279, 46);
 			this.OpenSteamButton.TabIndex = 4;
-			this.OpenSteamButton.Text = "Abrir Steam";
+			this.OpenSteamButton.Text = "Iniciar";
 			this.OpenSteamButton.UseVisualStyleBackColor = false;
 			this.OpenSteamButton.Click += new System.EventHandler(this.OpenSteamButton_Click);
 			// 
@@ -89,7 +88,7 @@ namespace L4D2AntiCheat.Forms
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(303, 297);
+			this.ClientSize = new System.Drawing.Size(303, 255);
 			this.Controls.Add(this.OpenSteamButton);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);

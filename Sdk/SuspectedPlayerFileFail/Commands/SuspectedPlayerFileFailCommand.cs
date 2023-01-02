@@ -18,7 +18,7 @@ public class SuspectedPlayerFileFailCommand
 
 	public static List<SuspectedPlayerFileFailCommand> Parse(IEnumerable<string> files)
 	{
-		var process = Left4Dead2ProcessHelper.GetProcess();
+		var process = Left4Dead2ProcessHelper.CurrentProcess;
 		if (string.IsNullOrEmpty(process?.MainModule?.FileName))
 			return new List<SuspectedPlayerFileFailCommand>();
 
