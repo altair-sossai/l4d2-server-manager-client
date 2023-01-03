@@ -1,5 +1,5 @@
-﻿using L4D2AntiCheat.Infrastructure.Helpers;
-using L4D2AntiCheat.Sdk.SuspectedPlayerFileFail.Enums;
+﻿using L4D2AntiCheat.Sdk.SuspectedPlayerFileFail.Enums;
+using File = L4D2AntiCheat.Modules.FileConsistency.Structures.File;
 
 namespace L4D2AntiCheat.Sdk.SuspectedPlayerFileFail.Commands;
 
@@ -16,22 +16,10 @@ public class SuspectedPlayerFileFailCommand
 	public string? File { get; }
 	public FailReason Reason { get; }
 
-	public static List<SuspectedPlayerFileFailCommand> Parse(IEnumerable<string> files)
+	public static List<SuspectedPlayerFileFailCommand> Parse(string folder, IEnumerable<File> files)
 	{
-		var process = Left4Dead2ProcessHelper.CurrentProcess;
-		if (string.IsNullOrEmpty(process?.MainModule?.FileName))
-			return new List<SuspectedPlayerFileFailCommand>();
-
-		var fileInfo = new FileInfo(process.MainModule.FileName);
-		var directoryInfo = fileInfo.Directory;
-		if (string.IsNullOrEmpty(directoryInfo?.FullName))
-			return new List<SuspectedPlayerFileFailCommand>();
-
-		var folder = directoryInfo.FullName;
-
 		return files
-			.Where(file => !string.IsNullOrEmpty(file))
-			.Select(file => new SuspectedPlayerFileFailCommand(folder, file))
+			.Select(file => new SuspectedPlayerFileFailCommand(folder, file.RelativePath))
 			.ToList();
 	}
 }

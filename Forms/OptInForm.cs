@@ -1,5 +1,5 @@
 ﻿using L4D2AntiCheat.DependencyInjection;
-using L4D2AntiCheat.Infrastructure.Helpers;
+using L4D2AntiCheat.Modules.OptIn;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace L4D2AntiCheat.Forms;
@@ -18,7 +18,7 @@ public partial class OptInForm : Form
 
 	private void YesButton_Click(object sender, EventArgs e)
 	{
-		OptInHelper.Accept();
+		OptIn.Accept();
 
 		using var serviceProvider = ServiceProviderFactory.New();
 		var startupForm = serviceProvider.GetRequiredService<StartupForm>();

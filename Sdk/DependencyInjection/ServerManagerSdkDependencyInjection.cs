@@ -36,7 +36,6 @@ public static class ServerManagerSdkDependencyInjection
 		serviceCollection.AddTransient<AuthorizationHeaderHandler>();
 
 		serviceCollection.AddRefitService<IServerPingService>();
-
 		serviceCollection.AddRefitService<ISuspectedPlayerService>();
 		serviceCollection.AddRefitService<ISuspectedPlayerFileCheck>();
 		serviceCollection.AddRefitService<ISuspectedPlayerPingService>();

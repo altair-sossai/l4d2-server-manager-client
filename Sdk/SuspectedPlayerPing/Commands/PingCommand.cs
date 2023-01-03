@@ -1,13 +1,11 @@
-﻿using L4D2AntiCheat.Infrastructure.Helpers;
-
-namespace L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
+﻿namespace L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
 
 public class PingCommand
 {
-    public PingCommand()
-    {
-        Focused = Left4Dead2ProcessHelper.IsFocused();
-    }
+	public PingCommand(bool focused)
+	{
+		Focused = focused;
+	}
 
-    public bool Focused { get; }
+	public bool Focused { get; }
 }

@@ -1,21 +1,14 @@
-using System.Diagnostics;
 using L4D2AntiCheat.App.CurrentUser;
 using L4D2AntiCheat.App.UserSecret.Repositories;
 using L4D2AntiCheat.App.UserSecret.Services;
+using L4D2AntiCheat.Context;
 using L4D2AntiCheat.DependencyInjection;
-using L4D2AntiCheat.Infrastructure.Helpers;
-using L4D2AntiCheat.Sdk.ServerPing.Services;
+using L4D2AntiCheat.Modules.Player.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Results;
-using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
-using L4D2AntiCheat.Sdk.SuspectedPlayerFileCheck.Services;
-using L4D2AntiCheat.Sdk.SuspectedPlayerFileFail.Commands;
-using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Commands;
-using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
-using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Commands;
-using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Services;
-using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerSecret.Services;
+using L4D2AntiCheat.Tasks;
+using L4D2AntiCheat.Tasks.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Timer = System.Windows.Forms.Timer;
@@ -24,69 +17,41 @@ namespace L4D2AntiCheat;
 
 public partial class MainForm : Form
 {
-	private static bool _serverTickRunning;
-	private static bool _fileHashTickRunning;
-	private static bool _pingTickRunning;
-	private static bool _screenTickRunning;
-	private static bool _processesTickRunning;
-
-	private readonly Timer _fileHashTimer = new()
-	{
-		Enabled = true,
-		Interval = 60 * 1000
-	};
-
-	private readonly Timer _pingTimer = new()
-	{
-		Enabled = false,
-		Interval = 15 * 1000
-	};
-
-	private readonly Timer _processesTimer = new()
-	{
-		Enabled = false,
-		Interval = 60 * 1000
-	};
-
-	private readonly Timer _screenshotTimer = new()
-	{
-		Enabled = false,
-		Interval = 45 * 1000
-	};
-
-	private readonly Timer _serverTimer = new()
-	{
-		Enabled = true,
-		Interval = 30 * 1000
-	};
-
+	private readonly AntiCheatContext _context = new();
 	private readonly ServiceProvider _serviceProvider = ServiceProviderFactory.New();
 
-	private bool? _fileHashIsValid;
-	private bool? _serverIsOn;
+	private readonly Timer _tasksTimer = new()
+	{
+		Interval = 1 * 1000
+	};
+
+	private bool _tasksRunning;
 
 	public MainForm()
 	{
 		InitializeComponent();
 
-		_pingTimer.Tick += (_, _) => PingTick();
-		_screenshotTimer.Tick += (_, _) => ScreenshotTick();
-		_processesTimer.Tick += (_, _) => ProcessesTick();
-		_serverTimer.Tick += (_, _) => ServerTick();
-		_fileHashTimer.Tick += (_, _) => FileHashTick();
+		_tasksTimer.Tick += (_, _) => TasksTick();
+		_tasksTimer.Enabled = true;
 	}
 
 	private ILogger Logger => _serviceProvider.GetRequiredService<ILogger>();
 	private ICurrentUser CurrentUser => _serviceProvider.GetRequiredService<ICurrentUser>();
 	private IUserSecretService UserSecretService => _serviceProvider.GetRequiredService<IUserSecretService>();
 	private IUserSecretRepository UserSecretRepository => _serviceProvider.GetRequiredService<IUserSecretRepository>();
-	private IServerPingService ServerPingService => _serviceProvider.GetRequiredService<IServerPingService>();
-	private ISuspectedPlayerService SuspectedPlayerService => _serviceProvider.GetRequiredService<ISuspectedPlayerService>();
-	private ISuspectedPlayerFileCheck SuspectedPlayerFileCheck => _serviceProvider.GetRequiredService<ISuspectedPlayerFileCheck>();
-	private ISuspectedPlayerPingService SuspectedPlayerPingService => _serviceProvider.GetRequiredService<ISuspectedPlayerPingService>();
-	private ISuspectedPlayerProcessService SuspectedPlayerProcessService => _serviceProvider.GetRequiredService<ISuspectedPlayerProcessService>();
-	private ISuspectedPlayerScreenshotService SuspectedPlayerScreenshotService => _serviceProvider.GetRequiredService<ISuspectedPlayerScreenshotService>();
 	private ISuspectedPlayerSecretService SuspectedPlayerSecretService => _serviceProvider.GetRequiredService<ISuspectedPlayerSecretService>();
+	private IPlayerService PlayerService => _serviceProvider.GetRequiredService<IPlayerService>();
+
+	private IEnumerable<IIntervalTask> Tasks => new IIntervalTask[]
+	{
+		_serviceProvider.GetRequiredService<ServerPingTask>(),
+		_serviceProvider.GetRequiredService<FileConsistencyTask>(),
+		_serviceProvider.GetRequiredService<SteamWasClosedTask>(),
+		_serviceProvider.GetRequiredService<Left4Dead2WasClosedTask>(),
+		_serviceProvider.GetRequiredService<PingTask>(),
+		_serviceProvider.GetRequiredService<ScreenshotTask>(),
+		_serviceProvider.GetRequiredService<ProcessesTask>()
+	};
 
 	protected override void OnLoad(EventArgs e)
 	{
@@ -95,9 +60,6 @@ public partial class MainForm : Form
 		try
 		{
 			RefreshSteamAccounts();
-
-			Task.Factory.StartNew(ServerTick);
-			Task.Factory.StartNew(FileHashTick);
 		}
 		catch (Exception exception)
 		{
@@ -107,8 +69,6 @@ public partial class MainForm : Form
 
 	private void SteamAccountComboBox_DataSourceChanged(object sender, EventArgs e)
 	{
-		DisableAllTimers();
-
 		var comboBox = sender as ComboBox;
 
 		if (comboBox?.DataSource is List<SuspectedPlayerResult> { Count: 0 })
@@ -117,7 +77,7 @@ public partial class MainForm : Form
 
 	private void SteamAccountComboBox_SelectedValueChanged(object? sender, EventArgs e)
 	{
-		DisableAllTimers();
+		_context.Clear();
 
 		var comboBox = sender as ComboBox;
 
@@ -155,11 +115,11 @@ public partial class MainForm : Form
 
 	private void RefreshSteamAccounts()
 	{
-		DisableAllTimers();
+		_context.Clear();
 
 		ShowInfo(@"Atualizando contas...");
 		SteamAccountComboBox.SelectedItem = null;
-		SteamAccountComboBox.DataSource = SuspectedPlayerService.SteamUsers();
+		SteamAccountComboBox.DataSource = PlayerService.Accounts();
 	}
 
 	private void SteamAccountSelected(SuspectedPlayerResult suspectedPlayer)
@@ -195,8 +155,7 @@ public partial class MainForm : Form
 
 			CurrentUser.LogIn(long.Parse(suspectedPlayer.CommunityId!), secret);
 
-			EnableAllTimers();
-			ProcessesTick();
+			_context.SuspectedPlayer = suspectedPlayer;
 		}
 		catch (Exception exception)
 		{
@@ -210,237 +169,63 @@ public partial class MainForm : Form
 		ShowError(@"Não foi possível validar o dispositivo atual", "Clique em 'Atualizar' para tentar novamente.");
 	}
 
-	private void DisableAllTimers()
+	private void TasksTick()
 	{
-		_pingTimer.Enabled = false;
-		_screenshotTimer.Enabled = false;
-		_processesTimer.Enabled = false;
-	}
-
-	private void EnableAllTimers()
-	{
-		_pingTimer.Enabled = true;
-		_screenshotTimer.Enabled = true;
-		_processesTimer.Enabled = true;
-	}
-
-	private void ServerTick()
-	{
-		if (_serverTickRunning)
+		if (_tasksRunning || _context.SuspectedPlayer == null)
 			return;
+
+		if (_context.InconsistentFiles || _context.SteamWasClosed || _context.Left4Dead2WasClosed)
+		{
+			ShowMessage();
+			return;
+		}
 
 		try
 		{
-			_serverTickRunning = true;
+			_tasksRunning = true;
 
-			var result = ServerPingService.GetAsync().Result;
+			foreach (var task in Tasks)
+				task.TryRun(_context);
 
-			_serverIsOn = result.IsOn;
+			ShowMessage();
 		}
 		catch (Exception exception)
 		{
-			Logger.Error(exception, nameof(ServerTick));
-			_serverIsOn = null;
+			Logger.Error(exception, nameof(TasksTick));
 		}
 		finally
 		{
-			_serverTickRunning = false;
+			_tasksRunning = false;
 		}
 	}
 
-	private void FileHashTick()
+	private void ShowMessage()
 	{
-		if (_fileHashTickRunning)
+		if (!_context.ServerIsOn)
+		{
+			ShowError(@"Servidor desligado");
 			return;
-
-		try
-		{
-			var running = Left4Dead2ProcessHelper.IsRunning();
-
-			switch (running)
-			{
-				case true when _fileHashIsValid == false:
-					_fileHashTickRunning = false;
-					return;
-
-				case false:
-					_fileHashTickRunning = false;
-					_fileHashIsValid = null;
-					return;
-			}
-
-			_fileHashTickRunning = true;
-			_fileHashIsValid = FileHashHelper.IsValid();
-
-			switch (_fileHashIsValid)
-			{
-				case true:
-					SuspectedPlayerFileCheck.SuccessAsync().Wait();
-					break;
-
-				case false:
-					var invalidFiles = FileHashHelper.InvalidFiles();
-					var commands = SuspectedPlayerFileFailCommand.Parse(invalidFiles);
-					SuspectedPlayerFileCheck.FailAsync(commands).Wait();
-					break;
-			}
 		}
-		catch (Exception exception)
-		{
-			Logger.Error(exception, nameof(FileHashTick));
-			_fileHashIsValid = null;
-		}
-		finally
-		{
-			_fileHashTickRunning = false;
-		}
-	}
 
-	private void PingTick()
-	{
-		if (_pingTickRunning || !AntiCheatIsRunning())
+		if (_context.InconsistentFiles)
+		{
+			ShowError(@"Os arquivos do jogo foram modificados", "Feche o jogo, restaure os arquivos do game e tente novamente");
 			return;
-
-		try
-		{
-			_pingTickRunning = true;
-
-			SuspectedPlayerPingService.PingAsync(new PingCommand()).Wait();
 		}
-		catch (Exception exception)
-		{
-			Logger.Error(exception, nameof(PingTick));
-		}
-		finally
-		{
-			_pingTickRunning = false;
-		}
-	}
 
-	private void ScreenshotTick()
-	{
-		if (_screenTickRunning || !AntiCheatIsRunning() || !Left4Dead2ProcessHelper.IsFocused())
+		if (_context.SteamWasClosed)
+		{
+			ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
 			return;
-
-		try
-		{
-			_screenTickRunning = true;
-
-			var result = SuspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
-			if (string.IsNullOrEmpty(result.Url))
-				return;
-
-			var process = Left4Dead2ProcessHelper.CurrentProcess;
-			if (process == null)
-				return;
-
-			using var screenshot = ScreenshotHelper.TakeScreenshot(process);
-
-			SuspectedPlayerScreenshotService.Upload(result.Url, screenshot);
 		}
-		catch (Exception exception)
-		{
-			Logger.Error(exception, nameof(ScreenshotTick));
-		}
-		finally
-		{
-			_screenTickRunning = false;
-		}
-	}
 
-	private void ProcessesTick()
-	{
-		if (_processesTickRunning || !AntiCheatIsRunning())
+		if (_context.Left4Dead2WasClosed)
+		{
+			ShowError(@"Left 4 Dead 2 foi fechado", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
 			return;
-
-		try
-		{
-			_processesTickRunning = true;
-
-			var commands = Process.GetProcesses()
-				.Where(process => process.Id != 0 && process.MainWindowHandle != IntPtr.Zero)
-				.Select(process => new ProcessCommand(process))
-				.ToList();
-
-			SuspectedPlayerProcessService.AddOrUpdateAsync(commands).Wait();
 		}
-		catch (Exception exception)
-		{
-			Logger.Error(exception, nameof(ProcessesTick));
-		}
-		finally
-		{
-			_processesTickRunning = false;
-		}
-	}
 
-	private bool AntiCheatIsRunning()
-	{
-		try
-		{
-			if (SteamProcessHelper.WasClosed())
-			{
-				ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
-				return false;
-			}
-
-			if (Left4Dead2ProcessHelper.WasClosed())
-			{
-				ShowError(@"Left 4 Dead 2 foi fechado", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
-				return false;
-			}
-
-			if (!Left4Dead2ProcessHelper.IsRunning())
-			{
-				ShowError(@"Left 4 Dead 2 não esta em execução");
-				return false;
-			}
-
-#if !DEBUG
-			if (Screen.AllScreens.Length != 1)
-			{
-				ShowError(@"Utilize apenas 1 monitor", "O Anti-cheat atualmente não dá suporte a vários monitores, por favor, utilize apenas um durante os jogos.");
-				return false;
-			}
-#endif
-
-			if (_serverIsOn == null)
-				ServerTick();
-
-			switch (_serverIsOn)
-			{
-				case null:
-					ShowError(@"Não foi possível acessar o servidor");
-					return false;
-
-				case false:
-					ShowError(@"Servidor desligado");
-					return false;
-			}
-
-			if (_fileHashIsValid == null)
-				FileHashTick();
-
-			switch (_fileHashIsValid)
-			{
-				case null:
-					ShowError(@"Não foi possível verificar os arquivos do jogo");
-					return false;
-
-				case false:
-					ShowError(@"Os arquivos do jogo foram modificados", "Feche o jogo, restaure os arquivos do game e tente novamente");
-					return false;
-			}
-
-			ShowSuccess(@"Anti-cheat em execução");
-
-			return true;
-		}
-		catch (Exception exception)
-		{
-			Logger.Error(exception, nameof(AntiCheatIsRunning));
-			return false;
-		}
+		ShowSuccess(@"Anti-cheat em execução");
 	}
 
 	private void ShowInfo(string message, string? details = null)

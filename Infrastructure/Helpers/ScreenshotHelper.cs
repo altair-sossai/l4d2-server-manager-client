@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using L4D2AntiCheat.Infrastructure.Extensions;
 
 namespace L4D2AntiCheat.Infrastructure.Helpers;
 
@@ -26,13 +27,13 @@ public static class ScreenshotHelper
 
 		var intPtr = new IntPtr(compatibleBitmap);
 		var hbitmap = Image.FromHbitmap(intPtr);
-		var bitmap = new Bitmap(hbitmap, hbitmap.Width, hbitmap.Height);
+		using var bitmap = new Bitmap(hbitmap, hbitmap.Width, hbitmap.Height);
 
 		_ = ReleaseDC(desktopWindow, windowDc);
 		DeleteDC(compatibleDc);
 		DeleteObject(compatibleBitmap);
 
-		return bitmap;
+		return bitmap.Resize();
 	}
 
 	[DllImport("user32.dll")]
