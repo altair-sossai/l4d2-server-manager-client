@@ -33,11 +33,11 @@ public class Left4Dead2ProcessInfo : Infrastructure.ProcessInfo, ILeft4Dead2Proc
 	{
 		get
 		{
-			var path = CurrentProcess?.MainModule?.FileName;
-			if (string.IsNullOrEmpty(path))
+			var fileName = CurrentProcess?.MainModule?.FileName;
+			if (string.IsNullOrEmpty(fileName))
 				return null;
 
-			var fileInfo = new FileInfo(path);
+			var fileInfo = new FileInfo(fileName);
 			var directoryInfo = fileInfo.Directory;
 
 			return directoryInfo?.FullName;

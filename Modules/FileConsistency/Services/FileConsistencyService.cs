@@ -27,21 +27,21 @@ public class FileConsistencyService : IFileConsistencyService
 	public FileConsistencyResult CheckFilesConsistency(string folder, DateTime startTime)
 	{
 		var files = Files.Where(file => !file.Consistent(folder, startTime));
-		var consistency = new FileConsistencyResult(files);
+		var result = new FileConsistencyResult(files);
 
-		switch (consistency.IsValid)
+		switch (result.Inconsistent)
 		{
 			case true:
-				_suspectedPlayerFileCheck.SuccessAsync().Wait();
-				break;
-
-			case false:
-				var inconsistentFiles = consistency.InconsistentFiles;
+				var inconsistentFiles = result.InconsistentFiles;
 				var commands = SuspectedPlayerFileFailCommand.Parse(folder, inconsistentFiles);
 				_suspectedPlayerFileCheck.FailAsync(commands).Wait();
 				break;
+
+			case false:
+				_suspectedPlayerFileCheck.SuccessAsync().Wait();
+				break;
 		}
 
-		return consistency;
+		return result;
 	}
 }

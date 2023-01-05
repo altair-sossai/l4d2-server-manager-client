@@ -72,7 +72,7 @@ public partial class MainForm : Form
 		var comboBox = sender as ComboBox;
 
 		if (comboBox?.DataSource is List<SuspectedPlayerResult> { Count: 0 })
-			ShowError(@"Nenhuma conta encontrada", "O dispositivo atual não possui nenhuma conta Steam registrada como suspeita, clique em 'Atualizar' para tentar novamente.");
+			ShowError(@"Nenhuma conta encontrada", "O dispositivo atual não possui conta Steam registrada como suspeita, clique em 'Atualizar' para tentar novamente");
 	}
 
 	private void SteamAccountComboBox_SelectedValueChanged(object? sender, EventArgs e)
@@ -96,7 +96,7 @@ public partial class MainForm : Form
 		}
 		catch (Exception exception)
 		{
-			ShowError("Erro ao validar a conta", "Clique em 'Atualizar' para tentar novamente.");
+			ShowError("Erro ao validar a conta", "Clique em 'Atualizar' para tentar novamente");
 			Logger.Error(exception, nameof(SteamAccountComboBox_SelectedValueChanged));
 		}
 	}
@@ -132,7 +132,7 @@ public partial class MainForm : Form
 
 		if (string.IsNullOrEmpty(secret))
 		{
-			ShowError(@"Conta já registrada em outro dispositivo", "A conta atual já está registrada em outro dispositivo, solicite ao administrador que resete seus dados de cadastro e tente novamente.");
+			ShowError(@"Conta já registrada em outro dispositivo", "A conta atual já está registrada em outro dispositivo, solicite ao administrador que resete seus dados de cadastro e tente novamente");
 			return;
 		}
 
@@ -166,7 +166,7 @@ public partial class MainForm : Form
 
 	private void SecretInvalid()
 	{
-		ShowError(@"Não foi possível validar o dispositivo atual", "Clique em 'Atualizar' para tentar novamente.");
+		ShowError(@"Não foi possível validar o dispositivo atual", "Clique em 'Atualizar' para tentar novamente");
 	}
 
 	private void TasksTick()
@@ -185,7 +185,7 @@ public partial class MainForm : Form
 			_tasksRunning = true;
 
 			foreach (var task in Tasks)
-				task.TryRun(_context);
+				task.Execute(_context);
 
 			ShowMessage();
 		}
@@ -215,13 +215,13 @@ public partial class MainForm : Form
 
 		if (_context.SteamWasClosed)
 		{
-			ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
+			ShowError(@"A Steam foi fechada", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez");
 			return;
 		}
 
 		if (_context.Left4Dead2WasClosed)
 		{
-			ShowError(@"Left 4 Dead 2 foi fechado", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez.");
+			ShowError(@"Left 4 Dead 2 foi fechado", "Por favor, feche o jogo (Left 4 Dead 2), feche a Steam, feche o Anti-cheat e inicie tudo outra vez");
 			return;
 		}
 

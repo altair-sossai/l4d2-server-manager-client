@@ -9,6 +9,6 @@ public class FileConsistencyResult
 		InconsistentFiles = inconsistentFiles.ToList();
 	}
 
-	public bool IsValid => InconsistentFiles.Count == 0;
+	public bool Inconsistent => InconsistentFiles.Any();
 	public List<File> InconsistentFiles { get; }
 }

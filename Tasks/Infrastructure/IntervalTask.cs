@@ -15,14 +15,11 @@ public abstract class IntervalTask : IIntervalTask
 		_interval = interval;
 	}
 
-	private bool MustBeExecuted => DateTime.Now > _lastRun.Add(_interval);
+	private bool Expired => DateTime.Now > _lastRun.Add(_interval);
 
-	public void TryRun(AntiCheatContext context)
+	public void Execute(AntiCheatContext context)
 	{
-		if (_running || !MustBeExecuted)
-			return;
-
-		if (!CanRun(context))
+		if (_running || !Expired || !CanRun(context))
 			return;
 
 		try
@@ -36,7 +33,7 @@ public abstract class IntervalTask : IIntervalTask
 		}
 		catch (Exception exception)
 		{
-			Log.Logger.Error(exception, nameof(TryRun));
+			Log.Logger.Error(exception, nameof(Execute));
 		}
 		finally
 		{

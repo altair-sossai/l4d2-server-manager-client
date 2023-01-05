@@ -4,5 +4,5 @@ namespace L4D2AntiCheat.Tasks.Infrastructure;
 
 public interface IIntervalTask
 {
-    void TryRun(AntiCheatContext context);
+    void Execute(AntiCheatContext context);
 }

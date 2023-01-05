@@ -28,21 +28,16 @@ public class FileConsistencyTask : IntervalTask
 
 	protected override void Run(AntiCheatContext context)
 	{
-		var process = _processInfo.CurrentProcess;
-		if (process == null)
+		var folder = _processInfo.RootFolder;
+		if (string.IsNullOrEmpty(folder))
 			return;
 
-		var fileName = process.MainModule?.FileName;
-		if (string.IsNullOrEmpty(fileName))
+		var startTime = _processInfo.CurrentProcess?.StartTime;
+		if (startTime == null)
 			return;
 
-		var fileInfo = new FileInfo(fileName);
-		var directoryInfo = fileInfo.Directory;
-		if (directoryInfo == null)
-			return;
+		var consistency = _fileConsistencyService.CheckFilesConsistency(folder, startTime.Value);
 
-		var consistency = _fileConsistencyService.CheckFilesConsistency(directoryInfo.FullName, process.StartTime);
-
-		context.InconsistentFiles = !consistency.IsValid;
+		context.InconsistentFiles = consistency.Inconsistent;
 	}
 }

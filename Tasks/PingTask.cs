@@ -21,7 +21,8 @@ public class PingTask : IntervalTask
 
 	protected override void Run(AntiCheatContext context)
 	{
-		var command = new PingCommand(_processInfo.IsFocused);
+		var focused = _processInfo.IsFocused;
+		var command = new PingCommand(focused);
 
 		_suspectedPlayerPingService.PingAsync(command).Wait();
 	}
