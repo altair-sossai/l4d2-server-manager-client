@@ -126,7 +126,7 @@
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "L4D2 Anti-Cheat";
+			this.Text = "Left 4 Dead 2 - Anti-Cheat";
 			((System.ComponentModel.ISupportInitialize)(this.SteamAccountPicture)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
