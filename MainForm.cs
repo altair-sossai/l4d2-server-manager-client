@@ -124,7 +124,7 @@ public partial class MainForm : Form
 
 	private void SteamAccountSelected(SuspectedPlayerResult suspectedPlayer)
 	{
-		ShowInfo(@"Validando conta...");
+		ShowInfo(@"Validando conta, aguarde...");
 		SteamAccountPicture.Load(suspectedPlayer.PictureUrl);
 
 		var communityId = long.Parse(suspectedPlayer.CommunityId!);

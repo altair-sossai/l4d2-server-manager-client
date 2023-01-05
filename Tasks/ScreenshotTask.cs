@@ -30,15 +30,15 @@ public class ScreenshotTask : IntervalTask
 
 	protected override void Run(AntiCheatContext context)
 	{
-		var result = _suspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
-		if (string.IsNullOrEmpty(result.Url))
-			return;
-
 		var process = _processInfo.CurrentProcess;
 		if (process == null)
 			return;
 
 		using var screenshot = ScreenshotHelper.TakeScreenshot(process);
+
+		var result = _suspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
+		if (string.IsNullOrEmpty(result.Url))
+			return;
 
 		_screenshotService.Upload(result.Url, screenshot);
 	}
