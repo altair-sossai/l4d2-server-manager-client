@@ -1,4 +1,5 @@
 ﻿using L4D2AntiCheat.Context;
+using L4D2AntiCheat.Infrastructure.Extensions;
 using L4D2AntiCheat.Infrastructure.Helpers;
 using L4D2AntiCheat.Modules.Screenshot.Services;
 using L4D2AntiCheat.ProcessInfo;
@@ -9,6 +10,7 @@ namespace L4D2AntiCheat.Tasks;
 
 public class ScreenshotTask : IntervalTask
 {
+	private static readonly HashSet<string> Md5S = new();
 	private readonly ILeft4Dead2ProcessInfo _processInfo;
 	private readonly IScreenshotService _screenshotService;
 	private readonly ISuspectedPlayerScreenshotService _suspectedPlayerScreenshotService;
@@ -34,12 +36,21 @@ public class ScreenshotTask : IntervalTask
 		if (process == null)
 			return;
 
-		using var screenshot = ScreenshotHelper.TakeScreenshot(process);
+		using var bitmap = ScreenshotHelper.TakeScreenshot(process);
+		using var memoryStream = bitmap.Compress();
+		
+		memoryStream.Position = 0;
+
+		var md5 = Md5Helper.Md5(memoryStream);
+		if (Md5S.Contains(md5))
+			return;
+
+		Md5S.Add(md5);
 
 		var result = _suspectedPlayerScreenshotService.GenerateUploadUrlAsync().Result;
 		if (string.IsNullOrEmpty(result.Url))
 			return;
 
-		_screenshotService.Upload(result.Url, screenshot);
+		_screenshotService.Upload(result.Url, memoryStream);
 	}
 }

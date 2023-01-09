@@ -2,5 +2,5 @@
 
 public interface IScreenshotService
 {
-	void Upload(string url, Bitmap bitmap);
+	void Upload(string url, Stream stream);
 }
