@@ -20,7 +20,7 @@ public static class ServerManagerSdkDependencyInjection
     private const string BaseUrl = "https://l4d2-server-manager-api.azurewebsites.net";
 #endif
 
-    private static readonly JsonSerializerOptions Options = new()
+	private static readonly JsonSerializerOptions Options = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true
@@ -48,6 +48,7 @@ public static class ServerManagerSdkDependencyInjection
         where TService : class
     {
         serviceCollection.AddRefitClient<TService>(Settings)
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { ServerCertificateCustomValidationCallback = (_, _, _, _) => true })
             .ConfigureHttpClient(c => c.BaseAddress = new Uri(BaseUrl))
             .AddHttpMessageHandler<AuthorizationHeaderHandler>();
     }
