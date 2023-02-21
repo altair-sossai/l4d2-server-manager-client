@@ -6,26 +6,26 @@ namespace L4D2AntiCheat.Forms;
 
 public partial class OptInForm : Form
 {
-	public OptInForm()
-	{
-		InitializeComponent();
-	}
+    public OptInForm()
+    {
+        InitializeComponent();
+    }
 
-	private void NoButton_Click(object sender, EventArgs e)
-	{
-		Application.Exit();
-	}
+    private void NoButton_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
 
-	private void YesButton_Click(object sender, EventArgs e)
-	{
-		OptIn.Accept();
+    private void YesButton_Click(object sender, EventArgs e)
+    {
+        OptIn.Accept();
 
-		using var serviceProvider = ServiceProviderFactory.New();
-		var startupForm = serviceProvider.GetRequiredService<StartupForm>();
-		startupForm.Closed += (_, _) => Application.Exit();
+        using var serviceProvider = ServiceProviderFactory.New();
+        var startupForm = serviceProvider.GetRequiredService<StartupForm>();
+        startupForm.Closed += (_, _) => Application.Exit();
 
-		Hide();
+        Hide();
 
-		startupForm.ShowDialog(this);
-	}
+        startupForm.ShowDialog(this);
+    }
 }

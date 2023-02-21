@@ -2,6 +2,6 @@
 
 public interface ISteamInfo
 {
-	string? SteamPath { get; }
-	IEnumerable<long> Accounts { get; }
+    string? SteamPath { get; }
+    IEnumerable<long> Accounts { get; }
 }

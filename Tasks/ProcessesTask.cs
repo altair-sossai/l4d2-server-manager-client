@@ -8,21 +8,21 @@ namespace L4D2AntiCheat.Tasks;
 
 public class ProcessesTask : IntervalTask
 {
-	private readonly ISuspectedPlayerProcessService _suspectedPlayerProcessService;
+    private readonly ISuspectedPlayerProcessService _suspectedPlayerProcessService;
 
-	public ProcessesTask(ISuspectedPlayerProcessService suspectedPlayerProcessService)
-		: base(TimeSpan.FromMinutes(1))
-	{
-		_suspectedPlayerProcessService = suspectedPlayerProcessService;
-	}
+    public ProcessesTask(ISuspectedPlayerProcessService suspectedPlayerProcessService)
+        : base(TimeSpan.FromMinutes(1))
+    {
+        _suspectedPlayerProcessService = suspectedPlayerProcessService;
+    }
 
-	protected override void Run(AntiCheatContext context)
-	{
-		var commands = Process.GetProcesses()
-			.Where(process => process.Id != 0 && process.MainWindowHandle != IntPtr.Zero)
-			.Select(process => new ProcessCommand(process))
-			.ToList();
+    protected override void Run(AntiCheatContext context)
+    {
+        var commands = Process.GetProcesses()
+            .Where(process => process.Id != 0 && process.MainWindowHandle != IntPtr.Zero)
+            .Select(process => new ProcessCommand(process))
+            .ToList();
 
-		_suspectedPlayerProcessService.AddOrUpdateAsync(commands).Wait();
-	}
+        _suspectedPlayerProcessService.AddOrUpdateAsync(commands).Wait();
+    }
 }

@@ -5,6 +5,6 @@ namespace L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
 
 public interface ISuspectedPlayerScreenshotService
 {
-	[Get("/api/suspected-players-screenshot/generate-upload-url")]
-	Task<GenerateUploadUrlResult> GenerateUploadUrlAsync();
+    [Get("/api/suspected-players-screenshot/generate-upload-url")]
+    Task<GenerateUploadUrlResult> GenerateUploadUrlAsync();
 }

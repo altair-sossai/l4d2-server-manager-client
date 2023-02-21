@@ -4,5 +4,5 @@ namespace L4D2AntiCheat.Modules.Player.Services;
 
 public interface IPlayerService
 {
-	List<SuspectedPlayerResult> Accounts();
+    List<SuspectedPlayerResult> Accounts();
 }

@@ -6,21 +6,21 @@ namespace L4D2AntiCheat.Tasks;
 
 public class Left4Dead2WasClosedTask : IntervalTask
 {
-	private readonly ILeft4Dead2ProcessInfo _processInfo;
+    private readonly ILeft4Dead2ProcessInfo _processInfo;
 
-	public Left4Dead2WasClosedTask(ILeft4Dead2ProcessInfo processInfo)
-		: base(TimeSpan.FromSeconds(30))
-	{
-		_processInfo = processInfo;
-	}
+    public Left4Dead2WasClosedTask(ILeft4Dead2ProcessInfo processInfo)
+        : base(TimeSpan.FromSeconds(30))
+    {
+        _processInfo = processInfo;
+    }
 
-	protected override bool CanRun(AntiCheatContext context)
-	{
-		return !context.Left4Dead2WasClosed && _processInfo.IsRunning;
-	}
+    protected override bool CanRun(AntiCheatContext context)
+    {
+        return !context.Left4Dead2WasClosed && _processInfo.IsRunning;
+    }
 
-	protected override void Run(AntiCheatContext context)
-	{
-		context.Left4Dead2WasClosed = _processInfo.WasClosed;
-	}
+    protected override void Run(AntiCheatContext context)
+    {
+        context.Left4Dead2WasClosed = _processInfo.WasClosed;
+    }
 }

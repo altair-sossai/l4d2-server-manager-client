@@ -2,10 +2,10 @@
 
 public class PingCommand
 {
-	public PingCommand(bool focused)
-	{
-		Focused = focused;
-	}
+    public PingCommand(bool focused)
+    {
+        Focused = focused;
+    }
 
-	public bool Focused { get; }
+    public bool Focused { get; }
 }

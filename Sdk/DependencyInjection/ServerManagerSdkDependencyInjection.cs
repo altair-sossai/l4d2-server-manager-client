@@ -15,40 +15,40 @@ namespace L4D2AntiCheat.Sdk.DependencyInjection;
 public static class ServerManagerSdkDependencyInjection
 {
 #if DEBUG
-	private const string BaseUrl = "http://localhost:7094";
+    private const string BaseUrl = "http://localhost:7094";
 #else
     private const string BaseUrl = "https://l4d2-server-manager-api.azurewebsites.net";
 #endif
 
-	private static readonly JsonSerializerOptions Options = new()
-	{
-		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-		WriteIndented = true
-	};
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
 
-	private static readonly RefitSettings Settings = new()
-	{
-		ContentSerializer = new SystemTextJsonContentSerializer(Options)
-	};
+    private static readonly RefitSettings Settings = new()
+    {
+        ContentSerializer = new SystemTextJsonContentSerializer(Options)
+    };
 
-	public static void AddServerManagerSdk(this IServiceCollection serviceCollection)
-	{
-		serviceCollection.AddTransient<AuthorizationHeaderHandler>();
+    public static void AddServerManagerSdk(this IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddTransient<AuthorizationHeaderHandler>();
 
-		serviceCollection.AddRefitService<IServerPingService>();
-		serviceCollection.AddRefitService<ISuspectedPlayerService>();
-		serviceCollection.AddRefitService<ISuspectedPlayerFileCheck>();
-		serviceCollection.AddRefitService<ISuspectedPlayerPingService>();
-		serviceCollection.AddRefitService<ISuspectedPlayerProcessService>();
-		serviceCollection.AddRefitService<ISuspectedPlayerScreenshotService>();
-		serviceCollection.AddRefitService<ISuspectedPlayerSecretService>();
-	}
+        serviceCollection.AddRefitService<IServerPingService>();
+        serviceCollection.AddRefitService<ISuspectedPlayerService>();
+        serviceCollection.AddRefitService<ISuspectedPlayerFileCheck>();
+        serviceCollection.AddRefitService<ISuspectedPlayerPingService>();
+        serviceCollection.AddRefitService<ISuspectedPlayerProcessService>();
+        serviceCollection.AddRefitService<ISuspectedPlayerScreenshotService>();
+        serviceCollection.AddRefitService<ISuspectedPlayerSecretService>();
+    }
 
-	private static void AddRefitService<TService>(this IServiceCollection serviceCollection)
-		where TService : class
-	{
-		serviceCollection.AddRefitClient<TService>(Settings)
-			.ConfigureHttpClient(c => c.BaseAddress = new Uri(BaseUrl))
-			.AddHttpMessageHandler<AuthorizationHeaderHandler>();
-	}
+    private static void AddRefitService<TService>(this IServiceCollection serviceCollection)
+        where TService : class
+    {
+        serviceCollection.AddRefitClient<TService>(Settings)
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(BaseUrl))
+            .AddHttpMessageHandler<AuthorizationHeaderHandler>();
+    }
 }

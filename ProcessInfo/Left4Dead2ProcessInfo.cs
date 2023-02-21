@@ -5,74 +5,74 @@ namespace L4D2AntiCheat.ProcessInfo;
 
 public class Left4Dead2ProcessInfo : Infrastructure.ProcessInfo, ILeft4Dead2ProcessInfo
 {
-	private readonly ISteamProcessInfo _steamProcessInfo;
+    private readonly ISteamProcessInfo _steamProcessInfo;
 
-	public Left4Dead2ProcessInfo(ISteamProcessInfo steamProcessInfo)
-		: base("left4dead2")
-	{
-		_steamProcessInfo = steamProcessInfo;
-	}
+    public Left4Dead2ProcessInfo(ISteamProcessInfo steamProcessInfo)
+        : base("left4dead2")
+    {
+        _steamProcessInfo = steamProcessInfo;
+    }
 
-	public bool IsFocused
-	{
-		get
-		{
-			var currentProcess = CurrentProcess;
-			if (currentProcess == null)
-				return false;
+    public bool IsFocused
+    {
+        get
+        {
+            var currentProcess = CurrentProcess;
+            if (currentProcess == null)
+                return false;
 
-			var foregroundWindow = GetForegroundWindow();
+            var foregroundWindow = GetForegroundWindow();
 
-			_ = GetWindowThreadProcessId(foregroundWindow, out var foregroundWindowProcessId);
+            _ = GetWindowThreadProcessId(foregroundWindow, out var foregroundWindowProcessId);
 
-			return currentProcess.Id == foregroundWindowProcessId;
-		}
-	}
+            return currentProcess.Id == foregroundWindowProcessId;
+        }
+    }
 
-	public string? RootFolder
-	{
-		get
-		{
-			var fileName = CurrentProcess?.MainModule?.FileName;
-			if (string.IsNullOrEmpty(fileName))
-				return null;
+    public string? RootFolder
+    {
+        get
+        {
+            var fileName = CurrentProcess?.MainModule?.FileName;
+            if (string.IsNullOrEmpty(fileName))
+                return null;
 
-			var fileInfo = new FileInfo(fileName);
-			var directoryInfo = fileInfo.Directory;
+            var fileInfo = new FileInfo(fileName);
+            var directoryInfo = fileInfo.Directory;
 
-			return directoryInfo?.FullName;
-		}
-	}
+            return directoryInfo?.FullName;
+        }
+    }
 
-	public bool AttachProcess()
-	{
-		var currentProcess = _steamProcessInfo.CurrentProcess;
-		if (currentProcess == null)
-			return false;
+    public bool AttachProcess()
+    {
+        var currentProcess = _steamProcessInfo.CurrentProcess;
+        if (currentProcess == null)
+            return false;
 
-		for (var i = 0; i < 60; i++)
-		{
-			Thread.Sleep(1000);
+        for (var i = 0; i < 60; i++)
+        {
+            Thread.Sleep(1000);
 
-			var process = GetProcess();
-			if (process == null)
-				continue;
+            var process = GetProcess();
+            if (process == null)
+                continue;
 
-			var parent = process.Parent();
-			if (parent == null || currentProcess.Id != parent.Id)
-				return false;
+            var parent = process.Parent();
+            if (parent == null || currentProcess.Id != parent.Id)
+                return false;
 
-			CurrentProcess = process;
+            CurrentProcess = process;
 
-			return true;
-		}
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	[DllImport("user32.dll")]
-	private static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 
-	[DllImport("user32.dll")]
-	private static extern int GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+    [DllImport("user32.dll")]
+    private static extern int GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 }

@@ -4,11 +4,11 @@ namespace L4D2AntiCheat.Modules.FileConsistency.Results;
 
 public class FileConsistencyResult
 {
-	public FileConsistencyResult(IEnumerable<File> inconsistentFiles)
-	{
-		InconsistentFiles = inconsistentFiles.ToList();
-	}
+    public FileConsistencyResult(IEnumerable<File> inconsistentFiles)
+    {
+        InconsistentFiles = inconsistentFiles.ToList();
+    }
 
-	public bool Inconsistent => InconsistentFiles.Any();
-	public List<File> InconsistentFiles { get; }
+    public bool Inconsistent => InconsistentFiles.Any();
+    public List<File> InconsistentFiles { get; }
 }
