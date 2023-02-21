@@ -10,6 +10,8 @@ namespace L4D2AntiCheat.Tasks;
 
 public class ScreenshotTask : IntervalTask
 {
+    private static readonly TimeSpan Interval = TimeSpan.FromSeconds(45);
+
     private static readonly HashSet<string> Md5S = new();
     private readonly ILeft4Dead2ProcessInfo _processInfo;
     private readonly IScreenshotService _screenshotService;
@@ -18,7 +20,7 @@ public class ScreenshotTask : IntervalTask
     public ScreenshotTask(ILeft4Dead2ProcessInfo processInfo,
         ISuspectedPlayerScreenshotService suspectedPlayerScreenshotService,
         IScreenshotService screenshotService)
-        : base(TimeSpan.FromSeconds(45))
+        : base(Interval)
     {
         _processInfo = processInfo;
         _suspectedPlayerScreenshotService = suspectedPlayerScreenshotService;

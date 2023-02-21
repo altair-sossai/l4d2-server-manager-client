@@ -8,12 +8,14 @@ namespace L4D2AntiCheat.Tasks;
 
 public class PingTask : IntervalTask
 {
+    private static readonly TimeSpan Interval = TimeSpan.FromSeconds(30);
+
     private readonly ILeft4Dead2ProcessInfo _processInfo;
     private readonly ISuspectedPlayerPingService _suspectedPlayerPingService;
 
     public PingTask(ILeft4Dead2ProcessInfo processInfo,
         ISuspectedPlayerPingService suspectedPlayerPingService)
-        : base(TimeSpan.FromSeconds(15))
+        : base(Interval)
     {
         _processInfo = processInfo;
         _suspectedPlayerPingService = suspectedPlayerPingService;

@@ -7,12 +7,14 @@ namespace L4D2AntiCheat.Tasks;
 
 public class FileConsistencyTask : IntervalTask
 {
+    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(1.5);
+
     private readonly IFileConsistencyService _fileConsistencyService;
     private readonly ILeft4Dead2ProcessInfo _processInfo;
 
     public FileConsistencyTask(ILeft4Dead2ProcessInfo processInfo,
         IFileConsistencyService fileConsistencyService)
-        : base(TimeSpan.FromMinutes(1))
+        : base(Interval)
     {
         _processInfo = processInfo;
         _fileConsistencyService = fileConsistencyService;

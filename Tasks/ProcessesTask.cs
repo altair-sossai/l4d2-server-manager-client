@@ -8,10 +8,12 @@ namespace L4D2AntiCheat.Tasks;
 
 public class ProcessesTask : IntervalTask
 {
+    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(2);
+
     private readonly ISuspectedPlayerProcessService _suspectedPlayerProcessService;
 
     public ProcessesTask(ISuspectedPlayerProcessService suspectedPlayerProcessService)
-        : base(TimeSpan.FromMinutes(1))
+        : base(Interval)
     {
         _suspectedPlayerProcessService = suspectedPlayerProcessService;
     }

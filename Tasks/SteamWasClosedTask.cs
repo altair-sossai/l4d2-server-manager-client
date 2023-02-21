@@ -6,10 +6,12 @@ namespace L4D2AntiCheat.Tasks;
 
 public class SteamWasClosedTask : IntervalTask
 {
+    private static readonly TimeSpan Interval = TimeSpan.FromSeconds(30);
+
     private readonly ISteamProcessInfo _processInfo;
 
     public SteamWasClosedTask(ISteamProcessInfo processInfo)
-        : base(TimeSpan.FromSeconds(30))
+        : base(Interval)
     {
         _processInfo = processInfo;
     }

@@ -6,10 +6,12 @@ namespace L4D2AntiCheat.Tasks;
 
 public class Left4Dead2WasClosedTask : IntervalTask
 {
+    private static readonly TimeSpan Interval = TimeSpan.FromSeconds(30);
+
     private readonly ILeft4Dead2ProcessInfo _processInfo;
 
     public Left4Dead2WasClosedTask(ILeft4Dead2ProcessInfo processInfo)
-        : base(TimeSpan.FromSeconds(30))
+        : base(Interval)
     {
         _processInfo = processInfo;
     }
