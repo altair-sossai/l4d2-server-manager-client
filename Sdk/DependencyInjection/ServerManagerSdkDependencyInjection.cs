@@ -3,6 +3,7 @@ using L4D2AntiCheat.Sdk.Handlers;
 using L4D2AntiCheat.Sdk.ServerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayer.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerFileCheck.Services;
+using L4D2AntiCheat.Sdk.SuspectedPlayerMetadata.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerPing.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerProcess.Services;
 using L4D2AntiCheat.Sdk.SuspectedPlayerScreenshot.Services;
@@ -42,7 +43,8 @@ public static class ServerManagerSdkDependencyInjection
         serviceCollection.AddRefitService<ISuspectedPlayerProcessService>();
         serviceCollection.AddRefitService<ISuspectedPlayerScreenshotService>();
         serviceCollection.AddRefitService<ISuspectedPlayerSecretService>();
-    }
+        serviceCollection.AddRefitService<ISuspectedPlayerMetadataService>();
+	}
 
     private static void AddRefitService<TService>(this IServiceCollection serviceCollection)
         where TService : class

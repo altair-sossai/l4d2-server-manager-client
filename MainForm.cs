@@ -50,8 +50,9 @@ public partial class MainForm : Form
         _serviceProvider.GetRequiredService<Left4Dead2WasClosedTask>(),
         _serviceProvider.GetRequiredService<PingTask>(),
         _serviceProvider.GetRequiredService<ScreenshotTask>(),
-        _serviceProvider.GetRequiredService<ProcessesTask>()
-    };
+        _serviceProvider.GetRequiredService<ProcessesTask>(),
+        _serviceProvider.GetRequiredService<MetadatasTask>(),
+	};
 
     protected override void OnLoad(EventArgs e)
     {
