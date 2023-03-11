@@ -68,9 +68,12 @@ public class MetadatasTask : IntervalTask
                 return null;
 
             var path = Path.Combine(_left4Dead2ProcessInfo.RootFolder, @"left4dead2\cfg\autoexec.cfg");
+            if (!File.Exists(path))
+                return null;
+
             var content = File.ReadAllText(path).Truncate(8000);
 
-            return new MetadataCommand("autoexec.cfg", content);
+            return string.IsNullOrEmpty(content) ? null : new MetadataCommand("autoexec.cfg", content);
         }
         catch (Exception exception)
         {
