@@ -19,7 +19,7 @@ public class AuthorizationHeaderHandler : DelegatingHandler
         if (!string.IsNullOrEmpty(accessToken))
             request.Headers.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
 
-        request.Headers.Add("X-AppId", "798B5BB6-9F09-41EC-A364-8336DB5FFED3");
+        request.Headers.Add("X-AppId", "203B8242-DB18-49EE-92CA-B3AF6F7AB0C2");
 
         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
     }
