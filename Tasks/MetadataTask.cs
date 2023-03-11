@@ -1,10 +1,12 @@
 using System.Management;
 using L4D2AntiCheat.Context;
+using L4D2AntiCheat.Infrastructure.Extensions;
 using L4D2AntiCheat.ProcessInfo;
 using L4D2AntiCheat.Sdk.SuspectedPlayerMetadata.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerMetadata.Extensions;
 using L4D2AntiCheat.Sdk.SuspectedPlayerMetadata.Services;
 using L4D2AntiCheat.Tasks.Infrastructure;
+using Serilog;
 
 namespace L4D2AntiCheat.Tasks;
 
@@ -12,15 +14,18 @@ public class MetadatasTask : IntervalTask
 {
     private static readonly TimeSpan Interval = TimeSpan.FromMinutes(10);
     private readonly ILeft4Dead2ProcessInfo _left4Dead2ProcessInfo;
-    private readonly ISteamProcessInfo _steamProcessInfo;
 
+    private readonly ILogger _logger;
+    private readonly ISteamProcessInfo _steamProcessInfo;
     private readonly ISuspectedPlayerMetadataService _suspectedPlayerMetadataService;
 
-    public MetadatasTask(ISuspectedPlayerMetadataService suspectedPlayerMetadataService,
+    public MetadatasTask(ILogger logger,
+        ISuspectedPlayerMetadataService suspectedPlayerMetadataService,
         ISteamProcessInfo steamProcessInfo,
         ILeft4Dead2ProcessInfo left4Dead2ProcessInfo)
         : base(Interval)
     {
+        _logger = logger;
         _suspectedPlayerMetadataService = suspectedPlayerMetadataService;
         _steamProcessInfo = steamProcessInfo;
         _left4Dead2ProcessInfo = left4Dead2ProcessInfo;
@@ -37,6 +42,7 @@ public class MetadatasTask : IntervalTask
 
         commands.AddIfNotNull(SteamCommandLine());
         commands.AddIfNotNull(Left4Dead2CommandLine());
+        commands.AddIfNotNull(Left4Dead2AutoExec());
 
         if (commands.Count == 0)
             return;
@@ -54,15 +60,42 @@ public class MetadatasTask : IntervalTask
         return _left4Dead2ProcessInfo.CurrentProcess == null ? null : CommandLine("L4D2 command line", _left4Dead2ProcessInfo.CurrentProcess.Id);
     }
 
-    private static MetadataCommand? CommandLine(string name, int processId)
+    private MetadataCommand? Left4Dead2AutoExec()
     {
-        var queryString = $"select CommandLine from win32_process where ProcessId = {processId}";
-        var managementObjectSearcher = new ManagementObjectSearcher(queryString);
-        var managementObjectCollection = managementObjectSearcher.Get();
+        try
+        {
+            if (string.IsNullOrEmpty(_left4Dead2ProcessInfo.RootFolder))
+                return null;
 
-        foreach (var managementBaseObject in managementObjectCollection)
-            return new MetadataCommand(name, managementBaseObject["CommandLine"]?.ToString());
+            var path = Path.Combine(_left4Dead2ProcessInfo.RootFolder, @"left4dead2\cfg\autoexec.cfg");
+            var content = File.ReadAllText(path).Truncate(8000);
 
-        return null;
+            return new MetadataCommand("autoexec.cfg", content);
+        }
+        catch (Exception exception)
+        {
+            _logger.Error(exception, nameof(Left4Dead2AutoExec));
+            return null;
+        }
+    }
+
+    private MetadataCommand? CommandLine(string name, int processId)
+    {
+        try
+        {
+            var queryString = $"select CommandLine from win32_process where ProcessId = {processId}";
+            var managementObjectSearcher = new ManagementObjectSearcher(queryString);
+            var managementObjectCollection = managementObjectSearcher.Get();
+
+            foreach (var managementBaseObject in managementObjectCollection)
+                return new MetadataCommand(name, managementBaseObject["CommandLine"]?.ToString());
+
+            return null;
+        }
+        catch (Exception exception)
+        {
+            _logger.Error(exception, nameof(CommandLine));
+            return null;
+        }
     }
 }
