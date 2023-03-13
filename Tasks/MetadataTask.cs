@@ -1,6 +1,5 @@
 using System.Management;
 using L4D2AntiCheat.Context;
-using L4D2AntiCheat.Infrastructure.Extensions;
 using L4D2AntiCheat.ProcessInfo;
 using L4D2AntiCheat.Sdk.SuspectedPlayerMetadata.Commands;
 using L4D2AntiCheat.Sdk.SuspectedPlayerMetadata.Extensions;
@@ -42,7 +41,6 @@ public class MetadatasTask : IntervalTask
 
         commands.AddIfNotNull(SteamCommandLine());
         commands.AddIfNotNull(Left4Dead2CommandLine());
-        commands.AddIfNotNull(Left4Dead2AutoExec());
 
         if (commands.Count == 0)
             return;
@@ -58,28 +56,6 @@ public class MetadatasTask : IntervalTask
     private MetadataCommand? Left4Dead2CommandLine()
     {
         return _left4Dead2ProcessInfo.CurrentProcess == null ? null : CommandLine("L4D2 command line", _left4Dead2ProcessInfo.CurrentProcess.Id);
-    }
-
-    private MetadataCommand? Left4Dead2AutoExec()
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(_left4Dead2ProcessInfo.RootFolder))
-                return null;
-
-            var path = Path.Combine(_left4Dead2ProcessInfo.RootFolder, @"left4dead2\cfg\autoexec.cfg");
-            if (!File.Exists(path))
-                return null;
-
-            var content = File.ReadAllText(path).Truncate(8000);
-
-            return string.IsNullOrEmpty(content) ? null : new MetadataCommand("autoexec.cfg", content);
-        }
-        catch (Exception exception)
-        {
-            _logger.Error(exception, nameof(Left4Dead2AutoExec));
-            return null;
-        }
     }
 
     private MetadataCommand? CommandLine(string name, int processId)
