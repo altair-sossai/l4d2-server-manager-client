@@ -19,7 +19,7 @@ public class UserSecretService : IUserSecretService
 
     public string? GetOrCreatUserSecret(long communityId)
     {
-        return _userSecretRepository.Get(communityId) ?? TryCreatUserSecret(communityId);
+        return TryCreatUserSecret(communityId) ?? _userSecretRepository.Get(communityId);
     }
 
     private string? TryCreatUserSecret(long communityId)
